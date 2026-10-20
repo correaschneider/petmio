@@ -3,7 +3,7 @@
  *
  * Cobertura atual: cão cartoon (3 cabeças, 2 corpos, 5 olhos, 2 bocas, coleira, bandana).
  * O que ainda não tem arte cai no procedural: gato inteiro e óculos (a peça gerada saiu
- * fotorrealista). A boca "neutro" é a boca fechada original da cabeça, separada no build. Pixel art = estas camadas pelo pixelador.
+ * fotorrealista). As bocas saem da boca fechada original da cabeça, separada no build. Pixel art = estas camadas pelo pixelador.
  */
 import type { DogBreed, PetTraits } from '@/domain/pet';
 import { FUR_COLORS, IRIS_COLORS } from '@/domain/pet';
@@ -13,15 +13,7 @@ import { drawGlasses, drawNameTag } from '../procedural/parts';
 import { svgDocument } from '../svg';
 import { CANVAS, canvasHeight, type PetRenderer, type RenderOptions } from '../types';
 import { mix } from './colors';
-import {
-  EYES,
-  LAYOUT,
-  MOUTH_EXTRA_STROKE,
-  eyePlacement,
-  mouthPlacement,
-  placementTransform,
-  type Placement,
-} from './layout';
+import { EYES, LAYOUT, eyePlacement, placementTransform, type Placement } from './layout';
 import { PARTS, type PartId } from './parts.generated';
 
 /** Contorno marrom da arte gerada (as peças já vêm com ele). */
@@ -50,20 +42,13 @@ function layer(
   return `<g transform="${placementTransform(placement)}">${paint(svg, palette)}</g>`;
 }
 
-/** Boca escolhida: traço engrossado com um `stroke` da mesma cor por cima do preenchimento. */
-function mouthLayer(
-  id: 'mouth.sorriso' | 'mouth.lingua',
-  breed: DogBreed,
-  palette: Palette,
-): string {
-  const placement = mouthPlacement(breed);
-  // stroke-width vive no espaço da peça: converte as unidades do viewBox pela escala.
-  const width = Math.round(MOUTH_EXTRA_STROKE / placement.k);
-  const thick = PARTS[id].svg.replaceAll(
-    'fill="__OUTLINE__"',
-    `fill="__OUTLINE__" stroke="__OUTLINE__" stroke-width="${width}" stroke-linejoin="round"`,
-  );
-  return layer(id, placement, palette, thick);
+/**
+ * Boca. A cabeça vem sem a boca embutida (o "V" que dividia as bochechas — o build separa):
+ * "neutro" = essa boca original de volta; "sorriso"/"lingua" = peças de boca da arte.
+ */
+function mouth(traits: PetTraits, breed: DogBreed, palette: Palette): string {
+  if (traits.mouth === 'neutro') return layer(`mouth.closed.${breed}`, LAYOUT.head, palette);
+  return layer(`mouth.${traits.mouth}`, LAYOUT.mouth, palette);
 }
 
 /** Peças disponíveis para os traços (sem fallback). */
@@ -93,11 +78,7 @@ export const renderLayered: PetRenderer = (traits, options: RenderOptions = {}) 
   body += layer(`head.${breed}`, LAYOUT.head, palette);
   body += layer(`eyes.${traits.eyes}.left`, eyePlacement('left'), palette);
   body += layer(`eyes.${traits.eyes}.right`, eyePlacement('right'), palette);
-  // "neutro" = a boca fechada que veio desenhada na cabeça (o build separa em peça própria).
-  body +=
-    traits.mouth === 'neutro'
-      ? layer(`mouth.closed.${breed}`, LAYOUT.head, palette)
-      : mouthLayer(`mouth.${traits.mouth}`, breed, palette);
+  body += mouth(traits, breed, palette);
   if (traits.acc === 'occhiali') body += glasses();
 
   const withTag = options.nameTag !== undefined;

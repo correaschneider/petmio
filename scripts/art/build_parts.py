@@ -140,7 +140,7 @@ def nearest_token(hex_color: str, kind: str) -> str:
         return hex_color
     c = np.array([int(hex_color[i : i + 2], 16) for i in (1, 3, 5)])
     if kind == "mouth":
-        # Só o traço vira token (o renderer engrossa); língua etc. ficam com a cor própria.
+        # Só o traço vira token (mesma cor de contorno da cabeça); a língua fica com a cor dela.
         outline = np.array(CLASSES["outline"][0])
         return CLASSES["outline"][1] if np.sum((outline - c) ** 2) < 40**2 else hex_color
     name = min(CLASSES, key=lambda k: np.sum((np.array(CLASSES[k][0]) - c) ** 2))
@@ -185,7 +185,10 @@ def anchors_for(pid: str, rgb: np.ndarray, bg: np.ndarray) -> dict[str, list[flo
     sizes = ndimage.sum(black, lab, index=range(1, n + 1))
     nose = int(np.argmax(sizes)) + 1
     ys, xs = np.where(lab == nose)
-    return {"nose": [round(float(xs.mean()), 1), round(float(ys.mean()), 1)], "noseBottom": [round(float(xs.mean()), 1), float(ys.max())]}
+    return {
+        "nose": [round(float(xs.mean()), 1), round(float(ys.mean()), 1)],
+        "noseBottom": [round(float(xs.mean()), 1), float(ys.max())],
+    }
 
 
 # Olhos: o par gerado vem quase encostado; cada lado vira uma peça para o renderer controlar o
@@ -197,13 +200,13 @@ EYE_SPLIT_X = 511
 # bochechas. Apagamos o trecho entre o fim do filtro e o contorno inferior (que fica), para a
 # peça de boca escolhida ocupar esse lugar; o trecho apagado vira a boca "neutro" da raça.
 MOUTH_ZONE_X = (402, 623)
-MOUTH_ZONE_TOP = 722  # fim do filtro (o traço que desce do nariz continua)
+MOUTH_ZONE_TOP = 722  # fim do filtro (o traço que desce do nariz fica na cabeça)
 
 
 CONTOUR_THICKNESS = 24  # espessura do traço do contorno inferior na fonte (px)
 
 
-def mouth_mask(color: np.ndarray, bg: np.ndarray) -> np.ndarray:
+def mouth_mask(color: np.ndarray, bg: np.ndarray, zone_top: int = MOUTH_ZONE_TOP) -> np.ndarray:
     """
     Traços da boca embutida: tudo que não é pelo, na zona da boca, ACIMA do contorno inferior.
     O contorno é reconstruído pela borda de baixo da silhueta (sempre limpa) menos a espessura
@@ -219,8 +222,8 @@ def mouth_mask(color: np.ndarray, bg: np.ndarray) -> np.ndarray:
     mask = np.zeros(bg.shape, dtype=bool)
     for i, x in enumerate(xs[8:-8], start=8):
         stop = int(np.floor(upper[i])) - 1
-        if stop > MOUTH_ZONE_TOP:
-            mask[MOUTH_ZONE_TOP:stop, x] = ink[MOUTH_ZONE_TOP:stop, x]
+        if stop > zone_top:
+            mask[zone_top:stop, x] = ink[zone_top:stop, x]
     return mask
 
 

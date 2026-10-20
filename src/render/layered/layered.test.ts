@@ -12,7 +12,6 @@ import {
 import { renderProcedural } from '../procedural';
 import { renderLayered } from '.';
 import { mix } from './colors';
-import { MOUTH_EXTRA_STROKE } from './layout';
 import { PARTS } from './parts.generated';
 
 describe('renderLayered', () => {
@@ -62,25 +61,31 @@ describe('renderLayered', () => {
   it('cabeças não trazem mais a boca embutida (vira peça própria)', () => {
     for (const breed of DOG_BREEDS) {
       const closed = PARTS[`mouth.closed.${breed}`];
-      // A boca apagada começa no fim do filtro e fica dentro da zona da boca.
-      expect(closed.box[1]).toBeGreaterThanOrEqual(722);
+      // A boca apagada (com o fim do filtro) fica dentro da zona da boca, abaixo do nariz.
+      expect(closed.box[1]).toBeGreaterThanOrEqual(690);
       expect(closed.box[0]).toBeGreaterThanOrEqual(400);
       expect(closed.box[2]).toBeLessThanOrEqual(625);
     }
   });
 
-  it('engrossa só o traço da boca escolhida, com a mesma espessura em toda raça', () => {
-    const extra = (breed: PetTraits['breed']) => {
-      const svg = renderLayered({ ...DEFAULT_TRAITS, breed, mouth: 'lingua' });
-      const width = Number(svg.match(/stroke-width="(\d+)" stroke-linejoin/)?.[1]);
-      const k = Number(svg.match(/scale\(([\d.]+)\) translate\(-512 -601\)/)?.[1]);
-      return width * k;
+  it('sorriso e língua usam as peças de boca da arte (cabeça já sem o "V")', () => {
+    const snippet = (id: keyof typeof PARTS) => {
+      const svg = PARTS[id].svg;
+      return svg.slice(svg.indexOf('<path'), svg.indexOf('<path') + 60);
     };
-    expect(extra('labrador')).toBeCloseTo(MOUTH_EXTRA_STROKE, 0);
-    expect(extra('pug')).toBeCloseTo(MOUTH_EXTRA_STROKE, 0);
-    expect(renderLayered({ ...DEFAULT_TRAITS, mouth: 'neutro' })).not.toMatch(
-      /stroke-linejoin="round"/,
-    );
+    for (const breed of DOG_BREEDS) {
+      const smile = renderLayered({ ...DEFAULT_TRAITS, breed, mouth: 'sorriso' });
+      expect(smile).toContain(snippet('mouth.sorriso'));
+      expect(smile).not.toContain(snippet(`mouth.closed.${breed}`));
+      const tongue = renderLayered({ ...DEFAULT_TRAITS, breed, mouth: 'lingua' });
+      expect(tongue).toContain(snippet('mouth.lingua'));
+      expect(tongue).not.toContain(snippet('mouth.sorriso'));
+    }
+  });
+
+  it('traço da boca usa a mesma cor de contorno da cabeça; a língua mantém a cor própria', () => {
+    expect(PARTS['mouth.sorriso'].svg).toContain('fill="__OUTLINE__"');
+    expect(PARTS['mouth.lingua'].svg).toMatch(/fill="#(?!111111)[0-9a-f]{6}"/);
   });
 });
 

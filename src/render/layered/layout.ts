@@ -1,5 +1,3 @@
-import type { DogBreed } from '@/domain/pet';
-
 /**
  * Onde cada categoria de peça cai no viewBox 300×320 (proporção chibi da referência-mestre:
  * cabeça ≈ 55% da altura e bem mais larga que o corpo).
@@ -19,7 +17,10 @@ export const LAYOUT = {
   body: { src: [513, 893], at: [150, 316], k: 0.235 },
   /** Topo da cabeça; o queixo sobrepõe o pescoço do corpo. Nariz cai em y≈129. */
   head: { src: [512, 157], at: [150, 12], k: 0.26 },
-  /** Topo do sorriso, logo abaixo do nariz. */
+  /**
+   * Sorriso/língua (arte original): topo logo abaixo do nariz, o fundo do "U" encosta no fim
+   * do filtro. A cabeça já vem sem o "V" das bochechas (o build apaga), então não cruza nada.
+   */
   mouth: { src: [512, 423], at: [150, 143], k: 0.13 },
   /** Topo do anel (fica atrás da cabeça); a frente aparece sob o queixo. */
   neck: { src: [512, 248], at: [150, 161], k: 0.14 },
@@ -40,23 +41,6 @@ export function eyePlacement(side: 'left' | 'right'): Placement {
   const e = EYES[side];
   return { src: e.src, at: [e.x, EYES.y], k: EYES.k };
 }
-
-/**
- * Boca escolhida: fundo do sorriso no lugar do "V" que o build apaga da cabeça (fim do filtro
- * em y≈159). A escala é por raça para caber entre as bochechas (o carlino tem o focinho mais
- * estreito e dobras que cruzariam as pontas do sorriso).
- */
-export function mouthPlacement(breed: DogBreed): Placement {
-  return { src: [512, 601], at: [150, 163], k: MOUTH_SCALE[breed] };
-}
-
-const MOUTH_SCALE: Record<DogBreed, number> = { labrador: 0.09, beagle: 0.09, pug: 0.074 };
-
-/**
- * Espessura extra do traço da boca, em unidades do viewBox: desenhada numa escala bem menor
- * que a cabeça, a boca sairia com ~1/3 da espessura do contorno dela (~6 unidades).
- */
-export const MOUTH_EXTRA_STROKE = 3.2;
 
 /** Converte um ponto da fonte para o viewBox. */
 export function project(p: Placement, x: number, y: number): [number, number] {

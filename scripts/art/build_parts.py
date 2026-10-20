@@ -49,8 +49,8 @@ PARTS: dict[str, tuple[str, str]] = {
     "eyes.assonnati": ("08-eyes-assonnati.jpg", "eyes"),
     "eyes.sorpresi": ("09-eyes-sorpresi.jpg", "eyes"),
     "eyes.dolci": ("10-eyes-dolci.jpg", "eyes"),
-    "mouth.sorriso": ("11-mouth-sorriso.jpg", "plain"),
-    "mouth.lingua": ("12-mouth-lingua.jpg", "plain"),
+    "mouth.sorriso": ("11-mouth-sorriso.jpg", "mouth"),
+    "mouth.lingua": ("12-mouth-lingua.jpg", "mouth"),
     "acc.collare": ("14-acc-collare.jpg", "plain"),
     "acc.bandana": ("15-acc-bandana.jpg", "plain"),
 }
@@ -139,6 +139,10 @@ def nearest_token(hex_color: str, kind: str) -> str:
     if kind == "plain":
         return hex_color
     c = np.array([int(hex_color[i : i + 2], 16) for i in (1, 3, 5)])
+    if kind == "mouth":
+        # Só o traço vira token (o renderer engrossa); língua etc. ficam com a cor própria.
+        outline = np.array(CLASSES["outline"][0])
+        return CLASSES["outline"][1] if np.sum((outline - c) ** 2) < 40**2 else hex_color
     name = min(CLASSES, key=lambda k: np.sum((np.array(CLASSES[k][0]) - c) ** 2))
     return CLASSES[name][1]
 
@@ -189,16 +193,63 @@ def anchors_for(pid: str, rgb: np.ndarray, bg: np.ndarray) -> dict[str, list[flo
 EYE_SPLIT_X = 511
 
 
+# Boca embutida nas cabeças: o gerador desenhou filtro + "V" + lábio inferior ligados às
+# bochechas. Apagamos o trecho entre o fim do filtro e o contorno inferior (que fica), para a
+# peça de boca escolhida ocupar esse lugar; o trecho apagado vira a boca "neutro" da raça.
+MOUTH_ZONE_X = (402, 623)
+MOUTH_ZONE_TOP = 722  # fim do filtro (o traço que desce do nariz continua)
+
+
+CONTOUR_THICKNESS = 24  # espessura do traço do contorno inferior na fonte (px)
+
+
+def mouth_mask(color: np.ndarray, bg: np.ndarray) -> np.ndarray:
+    """
+    Traços da boca embutida: tudo que não é pelo, na zona da boca, ACIMA do contorno inferior.
+    O contorno é reconstruído pela borda de baixo da silhueta (sempre limpa) menos a espessura
+    do traço, corrigida pela inclinação — onde o "V" encosta nas bochechas o contorno fica com
+    a espessura normal, sem degrau.
+    """
+    x_lo, x_hi = MOUTH_ZONE_X
+    ink = ~np.all(color == CLASSES["fur"][0], axis=2) & ~bg
+    xs = np.arange(x_lo - 8, x_hi + 8)
+    bottom = np.array([np.where(~bg[:, x])[0].max() for x in xs], dtype=float)
+    slope = np.gradient(np.convolve(bottom, np.ones(7) / 7, mode="same"))
+    upper = bottom - CONTOUR_THICKNESS * np.sqrt(1 + slope**2)
+    mask = np.zeros(bg.shape, dtype=bool)
+    for i, x in enumerate(xs[8:-8], start=8):
+        stop = int(np.floor(upper[i])) - 1
+        if stop > MOUTH_ZONE_TOP:
+            mask[MOUTH_ZONE_TOP:stop, x] = ink[MOUTH_ZONE_TOP:stop, x]
+    return mask
+
+
+def erase_mouth(color: np.ndarray, bg: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    color = color.copy()
+    color[mouth_mask(color, bg)] = CLASSES["fur"][0]
+    return color, bg
+
+
+def only_mouth(color: np.ndarray, bg: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    return color, bg | ~mouth_mask(color, bg)
+
+
 def build_all(pid: str, file: str, kind: str, preview: Path | None) -> list[Part]:
-    if kind != "eyes":
-        return [build(pid, file, kind, preview)]
-    return [
-        build(f"{pid}.left", file, kind, preview, keep=lambda x: x < EYE_SPLIT_X),
-        build(f"{pid}.right", file, kind, preview, keep=lambda x: x >= EYE_SPLIT_X),
-    ]
+    if kind == "eyes":
+        return [
+            build(f"{pid}.left", file, kind, preview, keep=lambda x: x < EYE_SPLIT_X),
+            build(f"{pid}.right", file, kind, preview, keep=lambda x: x >= EYE_SPLIT_X),
+        ]
+    if pid.startswith("head."):
+        breed = pid.split(".", 1)[1]
+        return [
+            build(pid, file, kind, preview, edit=erase_mouth),
+            build(f"mouth.closed.{breed}", file, kind, preview, edit=only_mouth),
+        ]
+    return [build(pid, file, kind, preview)]
 
 
-def build(pid: str, file: str, kind: str, preview: Path | None, keep=None) -> Part:
+def build(pid: str, file: str, kind: str, preview: Path | None, keep=None, edit=None) -> Part:
     src = Image.open(RAW / file).convert("RGB")
     rgb = np.asarray(src).astype(np.int16)
     bg = background_mask(rgb, kind)
@@ -206,9 +257,18 @@ def build(pid: str, file: str, kind: str, preview: Path | None, keep=None) -> Pa
     smooth = np.asarray(src.filter(ImageFilter.MedianFilter(5)))
     if keep is not None:
         bg = bg | ~keep(np.arange(bg.shape[1]))[None, :]
+    if kind == "plain":
+        color = quantize(smooth, bg)
+    elif kind == "mouth":
+        color = quantize(smooth, bg)
+        dark = _hsv(color.reshape(-1, 3) / 255.0)[:, 2].reshape(bg.shape) < 0.42
+        color[dark & ~bg] = CLASSES["outline"][0]
+    else:
+        color = classify(smooth, kind)
+    if edit is not None:
+        color, bg = edit(color, bg)
     ys, xs = np.where(~bg)
     x0, y0, x1, y1 = int(xs.min()), int(ys.min()), int(xs.max()) + 1, int(ys.max()) + 1
-    color = quantize(smooth, bg) if kind == "plain" else classify(smooth, kind)
     rgba = np.dstack([color, np.where(bg, 0, 255).astype(np.uint8)])[y0:y1, x0:x1]
     img = Image.fromarray(rgba, "RGBA")
     scale = min(1.0, TRACE_MAX / max(img.size))

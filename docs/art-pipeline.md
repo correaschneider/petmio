@@ -63,6 +63,11 @@ O script, por peça:
    trocados em runtime pelas cores do catálogo, sem uma peça por cor.
 5. **Olhos** viram duas peças (`.left`/`.right`): o par gerado vem quase encostado, e o
    espaçamento é decidido no layout.
+6. **Boca embutida nas cabeças:** o gerador desenhou filtro + "V" + lábio ligados às bochechas,
+   e a boca escolhida ficava por cima delas. O build apaga esse trecho (do fim do filtro até o
+   contorno inferior, que é reconstruído com espessura fixa pela borda da silhueta) e o salva
+   como `mouth.closed.<raça>`, usada na boca "neutro". Sorriso/língua ocupam o lugar do "V",
+   com escala por raça e traço engrossado para casar com o contorno da cabeça.
 
 As coordenadas ficam no enquadramento original 1024×1024. Peças da mesma categoria compartilham
 esse enquadramento, então `src/render/layered/layout.ts` tem **uma transformação por
@@ -71,7 +76,7 @@ proporção chibi da referência (cabeça ≈ 55% da altura).
 
 Ordem das camadas: corpo → coleira/bandana → cabeça → olhos → boca → óculos → plaquinha.
 
-**Fallbacks** (sem peça): gato inteiro → procedural; boca neutra → traço simples; óculos →
+**Fallbacks** (sem peça): gato inteiro → procedural; óculos →
 desenhados (a peça gerada saiu fotorrealista); tricolore → só a cor base, sem manchas.
 
 **Pixel art** passa estas mesmas camadas pelo pixelador (`render/raster.ts`): render em 8× e

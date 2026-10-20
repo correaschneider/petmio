@@ -30,7 +30,12 @@ export default function GalleryPage() {
       ),
     },
     { title: 'Occhi', items: EYES.map((eyes) => ({ ...DEFAULT_TRAITS, eyes })) },
-    { title: 'Bocca', items: MOUTHS.map((mouth) => ({ ...DEFAULT_TRAITS, mouth })) },
+    {
+      title: 'Bocca',
+      items: MOUTHS.flatMap((mouth) =>
+        BREEDS_BY_SPECIES.cane.map((breed) => ({ ...DEFAULT_TRAITS, mouth, breed })),
+      ),
+    },
     { title: 'Accessori', items: ACCESSORIES.map((acc) => ({ ...DEFAULT_TRAITS, acc })) },
     {
       title: 'Pelo',

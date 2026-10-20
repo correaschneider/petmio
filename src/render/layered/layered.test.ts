@@ -12,6 +12,7 @@ import {
 import { renderProcedural } from '../procedural';
 import { renderLayered } from '.';
 import { mix } from './colors';
+import { MOUTH_EXTRA_STROKE } from './layout';
 import { PARTS } from './parts.generated';
 
 describe('renderLayered', () => {
@@ -46,9 +47,40 @@ describe('renderLayered', () => {
     expect(renderLayered(cat)).toBe(renderProcedural(cat));
   });
 
-  it('boca neutra e óculos (sem peça) usam fallback desenhado', () => {
-    const svg = renderLayered({ ...DEFAULT_TRAITS, mouth: 'neutro', acc: 'occhiali' });
+  it('boca neutra usa a boca original da raça; óculos ainda desenhados', () => {
+    const svg = renderLayered({
+      ...DEFAULT_TRAITS,
+      breed: 'beagle',
+      mouth: 'neutro',
+      acc: 'occhiali',
+    });
+    const closed = PARTS['mouth.closed.beagle'].svg;
+    expect(svg).toContain(closed.slice(closed.indexOf('<path'), closed.indexOf('<path') + 60));
     expect(svg).toMatch(/<circle [^>]*r="26"/);
+  });
+
+  it('cabeças não trazem mais a boca embutida (vira peça própria)', () => {
+    for (const breed of DOG_BREEDS) {
+      const closed = PARTS[`mouth.closed.${breed}`];
+      // A boca apagada começa no fim do filtro e fica dentro da zona da boca.
+      expect(closed.box[1]).toBeGreaterThanOrEqual(722);
+      expect(closed.box[0]).toBeGreaterThanOrEqual(400);
+      expect(closed.box[2]).toBeLessThanOrEqual(625);
+    }
+  });
+
+  it('engrossa só o traço da boca escolhida, com a mesma espessura em toda raça', () => {
+    const extra = (breed: PetTraits['breed']) => {
+      const svg = renderLayered({ ...DEFAULT_TRAITS, breed, mouth: 'lingua' });
+      const width = Number(svg.match(/stroke-width="(\d+)" stroke-linejoin/)?.[1]);
+      const k = Number(svg.match(/scale\(([\d.]+)\) translate\(-512 -601\)/)?.[1]);
+      return width * k;
+    };
+    expect(extra('labrador')).toBeCloseTo(MOUTH_EXTRA_STROKE, 0);
+    expect(extra('pug')).toBeCloseTo(MOUTH_EXTRA_STROKE, 0);
+    expect(renderLayered({ ...DEFAULT_TRAITS, mouth: 'neutro' })).not.toMatch(
+      /stroke-linejoin="round"/,
+    );
   });
 });
 

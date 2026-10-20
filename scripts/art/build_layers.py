@@ -159,6 +159,7 @@ class Item:
     role: str
     outline: BaseGeometry | None = None   # contorno do guia que encosta nesta forma
     opacity: float = 1.0
+    floppy_ear: bool = False              # orelha caída: borda interna com linha de espessura constante
 
 
 @dataclass
@@ -230,7 +231,7 @@ def build(name: str) -> Model:
                 hidden_edge = head.exterior.buffer(t / 2).intersection(ears_union)
                 m.items.append(Item(layer, head, fill, role, unary_union([outline_of(visible_head), hidden_edge])))
                 for e in ears:
-                    m.items.append(Item(rule["ears_layer"], e, fill, role, outline_of(e)))
+                    m.items.append(Item(rule["ears_layer"], e, fill, role, outline_of(e), floppy_ear=True))
                 continue
             if rule.get("extend_up"):
                 g = neck_extension(g, rule["extend_up"])
@@ -246,6 +247,38 @@ def build(name: str) -> Model:
             if it.layer != "face-accessory" and it.outline is not None:
                 it.outline = it.outline.difference(zone)
         lenses[0].outline = unary_union([lenses[0].outline or Polygon(), dark.intersection(zone)])
+        # Manchas claras do rosto (focinho/faixa branca) tinham a borda recortada pelos aros: dentro
+        # da zona completa pela envoltória convexa, senão o desenho dos aros fica "marcado" sem óculos.
+        muzzles = [it for it in m.items if it.layer == "muzzle"]
+        for it in muzzles:
+            it.geom = unary_union([it.geom, it.geom.convex_hull.intersection(zone)])
+        # Faixa clara da testa: a ponte dos óculos a cortava do focinho — liga a ponta de baixo da
+        # faixa à borda de cima do focinho com uma ponte afunilada (não a envoltória inteira).
+        for it in m.items:
+            if it.layer == "head-spots" and muzzles and it.geom.intersects(zone):
+                _, _, _, by = it.geom.bounds
+                mz = unary_union([mm.geom for mm in muzzles])
+                _, my, _, _ = mz.bounds
+                neck = unary_union([it.geom.intersection(box(0, by - 25, 1024, by)),
+                                    mz.intersection(box(0, my, 1024, my + 30)).buffer(-20)]).convex_hull
+                it.geom = unary_union([it.geom, neck.intersection(zone)])
+
+    # Borda interna da orelha caída: o guia afina a linha até sumir perto dos olhos. Redesenha com
+    # espessura constante (a do contorno de fora) em todo o trecho onde o guia tinha linha; no alto,
+    # onde a orelha se funde com a cabeça e não havia linha, continua sem.
+    heads = [it for it in m.items if it.layer == "head"]
+    if heads:
+        face = max(heads, key=lambda it: it.geom.area).geom
+        for it in m.items:
+            if it.floppy_ear:
+                # Só o trecho principal (maior pedaço contínuo) da linha original: descarta sobras
+                # do aro dos óculos e o encontro com o contorno de fora.
+                near = dark.intersection(it.geom.boundary.buffer(t)).intersection(face)
+                main = max(parts(near.buffer(t * 0.6)), key=lambda p: p.area, default=None)
+                if main is None:
+                    continue
+                edge = it.geom.boundary.buffer(t * 0.8).intersection(face).intersection(main.buffer(t * 0.6))
+                it.outline = unary_union([it.outline or Polygon(), edge])
 
     # Acessórios precisam poder SAIR sem deixar buraco: preenche por baixo com o pelo da camada
     # de baixo (corpo sob coleira/bandana, cabeça sob os óculos).

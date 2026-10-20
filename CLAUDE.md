@@ -10,7 +10,9 @@
 - Texto de UI só em `src/i18n/it.ts` (nada hardcoded em JSX).
 - Cor só em `src/theme/tokens.ts` (UI) / `src/render/palette.ts` (arte). Componentes usam o tema.
 - Traço novo = catálogo (`domain/pet/catalog.ts`) + rótulo (`i18n`) + `TRAIT_FIELDS` + renderer.
-- No renderer, contorno sempre via `outline()`/`ctx.st` — nunca `stroke-width` à mão junto.
+- No renderer procedural, contorno sempre via `outline()`/`ctx.st` — nunca `stroke-width` à mão junto.
+- `src/render/layered/parts.generated.ts` é gerado: mudar a arte = `uv run scripts/art/build_parts.py`
+  e commitar o resultado (nunca editar à mão). Posição das peças em `layered/layout.ts`.
 - `domain/` e `render/` sem React. Componentes genéricos em `components/ui` não conhecem o pet.
 - Imports MUI por caminho (`@mui/material/Button`).
 

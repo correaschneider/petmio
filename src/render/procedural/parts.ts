@@ -46,13 +46,22 @@ export function drawEyes(ctx: DrawContext, eyes: Eyes, style: EyeStyle): string 
   return g;
 }
 
-export function drawGlasses(): string {
+export interface GlassesPlacement {
+  xs: readonly [number, number];
+  y: number;
+  r: number;
+}
+
+/** Óculos redondos; a posição padrão casa com os olhos do renderer procedural. */
+export function drawGlasses(
+  { xs, y, r }: GlassesPlacement = { xs: EYE_XS, y: EYE_Y, r: 19 },
+): string {
   const lens = (cx: number) =>
-    `<circle cx="${cx}" cy="${EYE_Y}" r="19" fill="${art.lensTint}" stroke="${art.outline}" stroke-width="5"/>`;
+    `<circle cx="${cx}" cy="${y}" r="${r}" fill="${art.lensTint}" stroke="${art.outline}" stroke-width="5"/>`;
   return (
-    lens(EYE_XS[0]) +
-    lens(EYE_XS[1]) +
-    `<path d="M141 ${EYE_Y} L159 ${EYE_Y}" stroke="${art.outline}" stroke-width="5" stroke-linecap="round"/>`
+    lens(xs[0]) +
+    lens(xs[1]) +
+    `<path d="M${xs[0] + r} ${y} L${xs[1] - r} ${y}" stroke="${art.outline}" stroke-width="5" stroke-linecap="round"/>`
   );
 }
 

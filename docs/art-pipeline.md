@@ -41,15 +41,50 @@ Generate ONE image per part, square, plain pure white background, part isolated 
   limited flat palette, 1-pixel dark outline, no anti-aliasing, minimal detail, no highlights".
 - Se o Gemini travar: **Recraft** (SVG nativo + estilo customizado a partir da referência).
 
-## Integração no app (próximo passo)
+## Integração no app
 
-1. Recortar fundo / vetorizar (Vectorizer ou Illustrator) → SVG por peça em
-   `src/render/layered/parts/` (ou `public/parts/`).
-2. Alinhar as âncoras do viewBox 300×320: cabeça 150,130 · corpo 150,248 · olhos y=118 em
-   x=122/178 · focinho ~150,160 · plaquinha y=306.
-3. Marcar no SVG as áreas de pelo (ex.: `fill="var(--fur)"` / `data-fill="fur|fur-light"`) para
-   recolorir com `FUR_COLORS`.
-4. Criar `renderLayered: PetRenderer` que compõe as camadas na ordem
-   orelhas → corpo → acessório de pescoço → cabeça → focinho/boca → olhos → óculos → plaquinha,
-   e apontar `renderPetSvg` para ele em `src/render/index.ts` (fallback para o procedural nas
-   peças que faltarem). Pixel art e PNG continuam funcionando sem mudança.
+Peças → `scripts/art/build_parts.py` → `src/render/layered/parts.generated.ts` → `renderLayered`.
+
+```bash
+uv run scripts/art/build_parts.py                 # regenera o módulo (commitar o resultado)
+uv run scripts/art/build_parts.py --preview DIR   # + PNG por peça para conferir a classificação
+```
+
+O script, por peça:
+
+1. **Fundo:** flood-fill do branco a partir das bordas (o branco dos olhos não encosta na borda,
+   então sobrevive); brancos internos grandes (miolo da coleira, vão entre as patas) também
+   viram transparente.
+2. **Classes de cor** (cabeça, corpo, olhos): cada pixel vira contorno / pelo / sombra / íris /
+   preto / branco, depois de um filtro de mediana que tira o ruído do JPEG. Boca e acessórios
+   ("plain") só têm a paleta quantizada em 6 cores.
+3. **Vetorização** com vtracer.
+4. **Placeholders:** pelo e íris saem como `__FUR__`, `__FUR_SHADE__`, `__IRIS__`, `__OUTLINE__`,
+   trocados em runtime pelas cores do catálogo, sem uma peça por cor.
+5. **Olhos** viram duas peças (`.left`/`.right`): o par gerado vem quase encostado, e o
+   espaçamento é decidido no layout.
+
+As coordenadas ficam no enquadramento original 1024×1024. Peças da mesma categoria compartilham
+esse enquadramento, então `src/render/layered/layout.ts` tem **uma transformação por
+categoria** (ponto da fonte → ponto do viewBox 300×320 + escala). A calibração atual segue a
+proporção chibi da referência (cabeça ≈ 55% da altura).
+
+Ordem das camadas: corpo → coleira/bandana → cabeça → olhos → boca → óculos → plaquinha.
+
+**Fallbacks** (sem peça): gato inteiro → procedural; boca neutra → traço simples; óculos →
+desenhados (a peça gerada saiu fotorrealista); tricolore → só a cor base, sem manchas.
+
+**Pixel art** passa estas mesmas camadas pelo pixelador (`render/raster.ts`): render em 8× e
+downsample por bloco com prioridade para o contorno (escuridão relativa ao bloco, para pelo
+preto não virar contorno).
+
+**Conferência visual:** `http://localhost:3010/dev/galleria` (só em dev) mostra uma linha por
+variação de traço.
+
+### Adicionar uma peça nova
+
+1. Salvar o JPG em `art/raw/cartoon/` no mesmo enquadramento das irmãs da categoria.
+2. Registrar em `PARTS` do script (id `categoria.valor`, tipo `fur` | `eyes` | `plain`) e rodar.
+3. Se for categoria nova, adicionar o `Placement` em `layout.ts` e a camada em
+   `layered/index.ts`; o TypeScript acusa id de peça inexistente (`PartId`).
+4. Conferir na galeria e rodar os testes.

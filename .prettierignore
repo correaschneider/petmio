@@ -5,3 +5,4 @@ pnpm-lock.yaml
 art
 docs/prototype-cagnolino.html
 docs/CONTEXT.md
+src/render/layered/parts.generated.ts

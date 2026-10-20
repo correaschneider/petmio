@@ -59,6 +59,7 @@ Detalhes em [`docs/architecture.md`](docs/architecture.md) e
 
 - ✅ Fluxo completo do protótipo: criar (com "Sorprendimi"), nomear, PNG com download real e
   cópia para a área de transferência; estilos Cartoon e Pixel art; tema claro/escuro.
-- 🎨 Arte ainda **procedural** (placeholder). 15 peças cartoon + 3 pixel de cão já geradas em
-  `art/raw/`; faltam boca neutra, pixel #4–#16 e todo o set de gato.
+- 🎨 **Cão com arte real** por camadas (14 peças do Nano Banana vetorizadas e recoloríveis,
+  também no pixel art). Gato ainda procedural; faltam boca neutra, óculos no estilo e o set de
+  gato (ver `docs/art-pipeline.md`). Galeria de conferência em `/dev/galleria` (só dev).
 - 🛒 Tela **Prodotti** e integração print-on-demand: fase futura.

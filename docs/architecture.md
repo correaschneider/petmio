@@ -12,9 +12,11 @@ i18n ──► todos os componentes (nenhum texto hardcoded em JSX)
 - **`domain/pet`** — IDs válidos (`as const`), cores do pelo/íris, regras (`withTrait`: trocar
   espécie reseta a raça), sorteio com RNG injetável (`surprise` nunca repete o valor atual),
   normalização do nome. Sem React, sem DOM: 100% testável.
-- **`render`** — contrato `PetRenderer = (traits, options) => string (SVG)`. O renderer ativo é
-  escolhido em `render/index.ts`. Hoje é o procedural (`render/procedural/`), com as partes
-  comuns (olhos, óculos, plaquinha) em `parts.ts`. Pixel art e PNG ficam em `raster.ts` e
+- **`render`** — contrato `PetRenderer = (traits, options) => string (SVG)`. O renderer ativo
+  (`render/index.ts`) é o **por camadas** (`render/layered/`), que compõe as peças vetorizadas
+  da arte gerada (ver `art-pipeline.md`) e cai no procedural (`render/procedural/`) no que
+  ainda não tem peça (gato). As partes comuns do procedural (olhos, óculos, plaquinha) ficam em
+  `procedural/parts.ts`. Pixel art e PNG ficam em `raster.ts` e
   `export-png.ts` e só dependem do contrato — trocar o renderer não mexe neles.
 - **`theme`** — `tokens.ts` é a fonte única de cor. `theme.ts` monta o tema MUI com
   `cssVariables` + `colorSchemes` (claro/escuro); o `InitColorSchemeScript` do layout aplica o
@@ -40,6 +42,9 @@ i18n ──► todos os componentes (nenhum texto hardcoded em JSX)
 - **Render de pixel cancelável por efeito** (`PixelPet`): cada efeito tem seu `cancelled`,
   substituindo o `renderSeq` global do protótipo; o status é derivado da última render concluída.
 - **Download real** (`<a download>`) + cópia via `ClipboardItem`.
+
+- **Peças no bundle:** `parts.generated.ts` ≈ 220 KB (≈ 97 KB gzip no chunk). Aceitável no
+  MVP; se crescer com o set de gato, carregar por espécie com `import()` dinâmico.
 
 ## Bugs do protótipo que não podem voltar
 

@@ -1,0 +1,4 @@
+# pnpm 11: aprova build-scripts necessários (sharp = otimização de imagem do Next).
+allowBuilds:
+  sharp: true
+  unrs-resolver: true

@@ -1,0 +1,17 @@
+# Dev local: `docker compose up` → http://localhost:3010
+services:
+  web:
+    build:
+      context: .
+      target: dev
+    # Mesmo uid do host: arquivos gerados (.next) não ficam como root.
+    user: '${UID:-1000}:${GID:-1000}'
+    command: ['node_modules/.bin/next', 'dev', '--hostname', '0.0.0.0']
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      NEXT_TELEMETRY_DISABLED: '1'
+      WATCHPACK_POLLING: 'true'
+    ports:
+      - '3010:3000'

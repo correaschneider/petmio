@@ -49,6 +49,8 @@
 - **Contorno**: vem do próprio guia — a silhueta escura menos todas as manchas é o desenho das
   linhas; cada camada leva a parte dele que encosta nela (espessuras idênticas ao original).
 - **Formas completas**: buracos fechados; cabeça de gato separada das orelhas por elipse; orelhas
-  caídas cortadas por polígono e cabeça completada pela envoltória convexa; corpo estendido por
+  caídas cortadas por polígono cuja borda interna segue a linha real do guia (`ear_line`, pontos
+  medidos; trecho escondido sob os óculos é interpolado), desenhada com espessura constante, e
+  cabeça completada pela envoltória convexa; corpo estendido por
   baixo da cabeça.
 - Prévias em `.preview/layers/` (montado, guia e cada camada sozinha).

@@ -33,7 +33,7 @@ from pathlib import Path
 import cairosvg
 import numpy as np
 from shapely import affinity
-from shapely.geometry import Polygon, box
+from shapely.geometry import LineString, Polygon, box
 from shapely.geometry.base import BaseGeometry
 from shapely.ops import unary_union
 from svgelements import Path as SvgPath
@@ -131,19 +131,27 @@ def split_head_ears(fur: BaseGeometry, ear_top: float) -> tuple[BaseGeometry, li
     return head, ears
 
 
-def floppy_ears(fur: BaseGeometry, left_poly: list[tuple[float, float]]) -> tuple[BaseGeometry, list[BaseGeometry], BaseGeometry]:
+def floppy_ears(
+    fur: BaseGeometry, left_poly: list[tuple[float, float]], left_line: list[tuple[float, float]]
+) -> tuple[BaseGeometry, list[tuple[BaseGeometry, LineString]], BaseGeometry]:
     """
-    Orelhas caídas (cão) saem da cabeça pelo polígono de corte (esquerda; a direita é espelhada).
-    A cabeça é completada por baixo das orelhas com a envoltória convexa — elas ficam na frente,
-    então a extensão só aparece se a orelha for trocada por outra.
+    Orelhas caídas (cão) saem da cabeça pelo polígono de corte da esquerda (a direita é
+    espelhada). A borda interna do polígono segue a linha REAL do guia (pontos medidos em
+    `ear_line`), que também vira a linha de espessura constante. A cabeça é completada por baixo
+    das orelhas com a envoltória convexa — elas ficam na frente, então a extensão só aparece se a
+    orelha for trocada por outra.
     """
-    left = Polygon(left_poly)
-    right = Polygon([(1024 - x, y) for x, y in left_poly])
-    cut = unary_union([left, right])
+    mirror = lambda pts: [(1024 - x, y) for x, y in pts]  # noqa: E731
     fur = solid(fur)
+    sides = [(Polygon(left_poly), LineString(left_line)), (Polygon(mirror(left_poly)), LineString(mirror(left_line)))]
+    cut = unary_union([poly for poly, _ in sides])
     # A orelha avança 3 px sobre a cabeça na emenda do corte: sem isso o antialias desenha um fio
     # entre duas áreas da mesma cor.
-    ears = [p.union(p.buffer(3).intersection(fur)) for p in (fur.intersection(left), fur.intersection(right)) if not p.is_empty]
+    ears = []
+    for poly, line in sides:
+        e = fur.intersection(poly)
+        if not e.is_empty:
+            ears.append((e.union(e.buffer(3).intersection(fur)), line))
     visible_head = fur.difference(cut)
     head = solid(visible_head).convex_hull
     return head, ears, visible_head
@@ -159,7 +167,7 @@ class Item:
     role: str
     outline: BaseGeometry | None = None   # contorno do guia que encosta nesta forma
     opacity: float = 1.0
-    floppy_ear: bool = False              # orelha caída: borda interna com linha de espessura constante
+    edge_line: LineString | None = None   # orelha caída: borda interna, vira linha de espessura constante
 
 
 @dataclass
@@ -197,6 +205,11 @@ def build(name: str) -> Model:
     m = Model(name, cfg["guide"], shapes[sil].fill, t)
     reach = t * 1.6
 
+    # Zona dos óculos (lentes + aros + ponte), se o guia tiver óculos.
+    lens_ids = [i for r in cfg["layers"] if r["layer"] == "face-accessory" for i in r["paths"]]
+    glasses_zone = (unary_union([shapes[i].geom for i in lens_ids]).convex_hull.buffer(t * 2.4)
+                    if lens_ids else Polygon())
+
     def outline_of(visible: BaseGeometry) -> BaseGeometry:
         return dark.intersection(visible.buffer(reach))
 
@@ -226,12 +239,13 @@ def build(name: str) -> Model:
                     m.items.append(Item(rule["ears_layer"], e, fill, role, outline_of(e.difference(head))))
                 continue
             if rule.get("op") == "floppy_ears":
-                head, ears, visible_head = floppy_ears(g, rule["ear_poly"])
+                head, ears_curves, visible_head = floppy_ears(g, rule["ear_poly"], rule["ear_line"])
+                ears = [e for e, _ in ears_curves]
                 ears_union = unary_union(ears)
                 hidden_edge = head.exterior.buffer(t / 2).intersection(ears_union)
                 m.items.append(Item(layer, head, fill, role, unary_union([outline_of(visible_head), hidden_edge])))
-                for e in ears:
-                    m.items.append(Item(rule["ears_layer"], e, fill, role, outline_of(e), floppy_ear=True))
+                for e, curve in ears_curves:
+                    m.items.append(Item(rule["ears_layer"], e, fill, role, outline_of(e), edge_line=curve))
                 continue
             if rule.get("extend_up"):
                 g = neck_extension(g, rule["extend_up"])
@@ -263,22 +277,12 @@ def build(name: str) -> Model:
                                     mz.intersection(box(0, my, 1024, my + 30)).buffer(-20)]).convex_hull
                 it.geom = unary_union([it.geom, neck.intersection(zone)])
 
-    # Borda interna da orelha caída: o guia afina a linha até sumir perto dos olhos. Redesenha com
-    # espessura constante (a do contorno de fora) em todo o trecho onde o guia tinha linha; no alto,
-    # onde a orelha se funde com a cabeça e não havia linha, continua sem.
-    heads = [it for it in m.items if it.layer == "head"]
-    if heads:
-        face = max(heads, key=lambda it: it.geom.area).geom
-        for it in m.items:
-            if it.floppy_ear:
-                # Só o trecho principal (maior pedaço contínuo) da linha original: descarta sobras
-                # do aro dos óculos e o encontro com o contorno de fora.
-                near = dark.intersection(it.geom.boundary.buffer(t)).intersection(face)
-                main = max(parts(near.buffer(t * 0.6)), key=lambda p: p.area, default=None)
-                if main is None:
-                    continue
-                edge = it.geom.boundary.buffer(t * 0.8).intersection(face).intersection(main.buffer(t * 0.6))
-                it.outline = unary_union([it.outline or Polygon(), edge])
+    # Borda interna da orelha caída: o guia afina a linha até sumir perto dos olhos (e no beagle o
+    # aro dos óculos a encobria). Desenha a curva ajustada com espessura constante (a do contorno);
+    # no alto, onde a orelha se funde com a cabeça e não havia linha, continua sem.
+    for it in m.items:
+        if it.edge_line is not None:
+            it.outline = unary_union([it.outline or Polygon(), it.edge_line.buffer(t * 0.8, cap_style="round")])
 
     # Acessórios precisam poder SAIR sem deixar buraco: preenche por baixo com o pelo da camada
     # de baixo (corpo sob coleira/bandana, cabeça sob os óculos).

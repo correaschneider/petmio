@@ -7,7 +7,8 @@ Mapa de camadas de cada guia do Recraft (índice do <path> no SVG → camada).
   fill     cor forçada (ex.: degradê)   role     papel da cor (fur, fur-light, spot, pink, ...)
   pick     filtra peças pelo centróide  extend_up  estende para cima (corpo sob a cabeça)
   merge    junta os paths numa forma só    opacity  transparência (lente)
-  op="floppy_ears" corta orelhas caídas por polígono (ear_poly da esquerda, espelhado)
+  op="floppy_ears" corta orelhas caídas por polígono (ear_poly da esquerda, espelhado); a borda
+                  interna segue ear_line (pontos medidos da linha real), desenhada com espessura constante
   op="head_ears"  separa cabeça/orelhas pontudas por elipse (ear_top, ears_layer)
 `lines` roteia os traços recuperados da silhueta (bigodes, armação...) por caixa.
 """
@@ -86,7 +87,16 @@ MODELS = {
         "drop": [0, 10, 27, 28],
         "layers": [
             {"layer": "head", "paths": [2], "op": "floppy_ears", "ears_layer": "ears", "outline": True,
-             "ear_poly": [(200, 180), (420, 190), (400, 280), (424, 460), (440, 640), (200, 640)]},
+             # Borda interna = centro da linha real do guia. Entre y≈320 e 400 ela some sob o aro dos
+             # óculos: ali os pontos são interpolados (x≈322), senão a linha seguiria o aro.
+             "ear_line": [(349, 250), (340, 265), (334, 280), (330, 295), (326, 310), (323, 325), (322, 340),
+                          (322, 355), (323, 370), (325, 385), (330, 400), (336, 415), (344, 430), (352, 445),
+                          (361, 460), (368, 475), (372, 490), (375, 505), (376, 520), (375, 535), (372, 550),
+                          (366, 565)],
+             "ear_poly": [(200, 170), (400, 185), (370, 220), (349, 250), (340, 265), (334, 280), (330, 295),
+                          (326, 310), (323, 325), (322, 340), (322, 355), (323, 370), (325, 385), (330, 400),
+                          (336, 415), (344, 430), (352, 445), (361, 460), (368, 475), (372, 490), (375, 505),
+                          (376, 520), (375, 535), (372, 550), (366, 565), (360, 600), (380, 650), (200, 650)]},
             {"layer": "head", "paths": [25, 26], "outline": True},
             {"layer": "head-spots", "paths": [3], "role": "spot"},
             {"layer": "muzzle", "paths": [7], "solid": True, "role": "white"},
@@ -135,7 +145,10 @@ MODELS = {
         "drop": [0, 3, 4, 8, 9, 10, 12, 15, 22, *range(23, 36), 42, 43, 44, 49, 50],
         "layers": [
             {"layer": "head", "paths": [2], "op": "floppy_ears", "ears_layer": "ears", "outline": True, "fill": "#f2b74f",
-             "ear_poly": [(120, 80), (430, 120), (370, 240), (330, 400), (320, 560), (120, 560)]},
+             "ear_line": [(330, 250), (322, 280), (318, 310), (318, 340), (321, 370), (322, 400), (319, 430),
+                          (311, 460), (300, 490)],
+             "ear_poly": [(120, 80), (430, 120), (360, 210), (330, 250), (322, 280), (318, 310), (318, 340),
+                          (321, 370), (322, 400), (319, 430), (311, 460), (300, 490), (300, 560), (120, 560)]},
             {"layer": "ears", "paths": [5, 6, 7], "role": "fur-shade"},
             {"layer": "nose", "paths": [11, 13], "role": "line"},
             {"layer": "mouth", "paths": [21], "role": "line"},

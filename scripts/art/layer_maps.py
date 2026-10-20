@@ -63,7 +63,8 @@ MODELS = {
             {"layer": "ears", "paths": [21, 23], "merge": True, "outline": True, "fill": "#7d4217", "role": "spot"},
             {"layer": "ears", "paths": [20, 24], "merge": True, "outline": True, "fill": "#7d4217", "role": "spot"},
             {"layer": "ears", "paths": [20, 21], "role": "pink"},
-            {"layer": "mouth", "paths": [4, 5, 6], "role": "line"},
+            {"layer": "mouth", "paths": [4, 6], "role": "line"},
+            {"layer": "mouth", "paths": [5], "role": "pink"},  # língua
             {"layer": "nose", "paths": [7], "role": "pink"},
             {"layer": "eyes", "paths": [8, 9, 10, 11, 12, 13], "role": "eye"},
             {"layer": "body", "paths": [25, 26, 27, 28], "outline": True, "role": "spot"},
@@ -89,7 +90,8 @@ MODELS = {
             {"layer": "head", "paths": [25, 26], "outline": True},
             {"layer": "head-spots", "paths": [3], "role": "spot"},
             {"layer": "muzzle", "paths": [7], "solid": True, "role": "white"},
-            {"layer": "mouth", "paths": [12, 8, 9], "role": "line"},
+            {"layer": "mouth", "paths": [12, 9], "role": "line"},
+            {"layer": "mouth", "paths": [8], "role": "pink"},  # língua
             {"layer": "nose", "paths": [11], "role": "line"},
             {"layer": "eyes", "paths": [14, 15, 16, 18, 19, 20], "role": "eye"},
             {"layer": "face-accessory", "paths": [13, 17], "role": "lens", "outline": True, "solid": False, "opacity": 0.35},

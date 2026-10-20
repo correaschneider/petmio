@@ -241,7 +241,7 @@ def build(name: str) -> Model:
     # a ponte passava perto do pelo e ia parar no contorno da cabeça, sem acompanhar o transplante.
     lenses = [it for it in m.items if it.layer == "face-accessory"]
     if lenses:
-        zone = unary_union([it.geom for it in lenses]).convex_hull.buffer(t)
+        zone = unary_union([it.geom for it in lenses]).convex_hull.buffer(t * 2.4)
         for it in m.items:
             if it.layer != "face-accessory" and it.outline is not None:
                 it.outline = it.outline.difference(zone)
@@ -258,7 +258,7 @@ def build(name: str) -> Model:
         host = main_item(under)
         if acc.is_empty or host is None:
             continue
-        hull = unary_union([it.geom for it in m.items if it.layer in ("body", "head", "muzzle")]).convex_hull
+        hull = unary_union([it.geom for it in m.items if it.layer in ("body", "head", "muzzle", "ears")]).convex_hull
         filler = acc.buffer(4).intersection(hull)
         m.items.insert(m.items.index(host) + 1, Item(under, filler, host.fill, host.role))
 

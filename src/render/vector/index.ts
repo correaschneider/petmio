@@ -110,11 +110,21 @@ function colorOf(shape: VectorShape, p: Palette): string {
   }
 }
 
-function paintShapes(shapes: readonly VectorShape[] | undefined, p: Palette): string {
+/**
+ * `linesAsOutline`: traços (role "line") viram a cor de contorno do modelo-alvo. Usado na boca e
+ * nos óculos — o guia do beagle desenhou a boca em preto, e boca/óculos transplantados viriam
+ * com o marrom do modelo de origem.
+ */
+function paintShapes(
+  shapes: readonly VectorShape[] | undefined,
+  p: Palette,
+  linesAsOutline = false,
+): string {
   return (shapes ?? [])
     .map((s) => {
       const op = s.opacity !== undefined ? ` opacity="${s.opacity}"` : '';
-      return `<path fill="${colorOf(s, p)}"${op} d="${s.d}"/>`;
+      const fill = linesAsOutline && s.role === 'line' ? p.outline : colorOf(s, p);
+      return `<path fill="${fill}"${op} d="${s.d}"/>`;
     })
     .join('');
 }
@@ -161,7 +171,7 @@ function mouthLayer(traits: PetTraits, base: VectorModel, p: Palette): string {
   const k =
     width(base.anchors.head ?? base.anchors.face) / width(src.anchors.head ?? src.anchors.face);
   const t = moveTo(center(snose), snose[3] ?? 0, nx, ny, k);
-  return `<g transform="${t}">${paintShapes(src.layers.mouth, { ...p, outline: src.outline })}</g>`;
+  return `<g transform="${t}">${paintShapes(src.layers.mouth, p, true)}</g>`;
 }
 
 function neckLayer(traits: PetTraits, base: VectorModel, p: Palette): string {
@@ -186,7 +196,7 @@ function glassesLayer(base: VectorModel, p: Palette): string {
     (de1.cy + de2.cy) / 2,
     k,
   );
-  return `<g transform="${t}">${paintShapes(src.layers['face-accessory'], { ...p, outline: src.outline })}</g>`;
+  return `<g transform="${t}">${paintShapes(src.layers['face-accessory'], p, true)}</g>`;
 }
 
 export const renderVector: PetRenderer = (traits, options: RenderOptions = {}) => {

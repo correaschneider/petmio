@@ -237,6 +237,16 @@ def build(name: str) -> Model:
             m.items.append(Item(layer, g, fill, role, outline_of(visible) if has_outline else None,
                                 rule.get("opacity", 1.0)))
 
+    # Óculos: tudo que é linha escura entre/em volta das lentes (aros E a ponte) é dos óculos —
+    # a ponte passava perto do pelo e ia parar no contorno da cabeça, sem acompanhar o transplante.
+    lenses = [it for it in m.items if it.layer == "face-accessory"]
+    if lenses:
+        zone = unary_union([it.geom for it in lenses]).convex_hull.buffer(t)
+        for it in m.items:
+            if it.layer != "face-accessory" and it.outline is not None:
+                it.outline = it.outline.difference(zone)
+        lenses[0].outline = unary_union([lenses[0].outline or Polygon(), dark.intersection(zone)])
+
     # Acessórios precisam poder SAIR sem deixar buraco: preenche por baixo com o pelo da camada
     # de baixo (corpo sob coleira/bandana, cabeça sob os óculos).
     def main_item(layer: str) -> Item | None:

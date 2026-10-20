@@ -284,6 +284,16 @@ def build(name: str) -> Model:
         if it.edge_line is not None:
             it.outline = unary_union([it.outline or Polygon(), it.edge_line.buffer(t * 0.8, cap_style="round")])
 
+    # Coleira: a borda de cima dela (e as alças da plaquinha) caía no alcance do contorno da cabeça e
+    # ficava no queixo sem coleira. Perto do acessório, a cabeça só leva a linha colada na própria borda.
+    neck_acc = unary_union([it.geom for it in m.items if it.layer == "neck-accessory"])
+    if not neck_acc.is_empty:
+        near = neck_acc.buffer(t * 2)
+        for it in m.items:
+            if it.layer in ("head", "muzzle", "ears") and it.outline is not None:
+                close = it.outline.intersection(near).intersection(it.geom.buffer(t))
+                it.outline = it.outline.difference(near).union(close)
+
     # Acessórios precisam poder SAIR sem deixar buraco: preenche por baixo com o pelo da camada
     # de baixo (corpo sob coleira/bandana, cabeça sob os óculos).
     def main_item(layer: str) -> Item | None:

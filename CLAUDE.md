@@ -11,8 +11,9 @@
 - Cor só em `src/theme/tokens.ts` (UI) / `src/render/palette.ts` (arte). Componentes usam o tema.
 - Traço novo = catálogo (`domain/pet/catalog.ts`) + rótulo (`i18n`) + `TRAIT_FIELDS` + renderer.
 - No renderer procedural, contorno sempre via `outline()`/`ctx.st` — nunca `stroke-width` à mão junto.
-- `src/render/layered/parts.generated.ts` é gerado: mudar a arte = `uv run scripts/art/build_parts.py`
-  e commitar o resultado (nunca editar à mão). Posição das peças em `layered/layout.ts`.
+- Arte = camadas vetoriais dos guias do Recraft (`art/recraft/`). `src/render/vector/models.generated.ts`
+  é gerado: mudar a arte/mapa = `uv run scripts/art/build_layers.py` e commitar o resultado (nunca
+  editar à mão). Mapa path→camada em `scripts/art/layer_maps.py`; spec em `docs/art-layers-spec.md`.
 - `domain/` e `render/` sem React. Componentes genéricos em `components/ui` não conhecem o pet.
 - Imports MUI por caminho (`@mui/material/Button`).
 

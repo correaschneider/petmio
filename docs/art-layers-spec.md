@@ -6,20 +6,20 @@
 
 ## Ordem (de trás para frente)
 
-| # | Camada | Variações | Observações |
-|---|--------|-----------|-------------|
-| 1 | Rabo | por espécie | gato sempre; cão opcional |
-| 2 | Corpo | atletico, robusto | só silhueta + patas, cor única de pelo |
-| 3 | Manchas do corpo | opcional | cor própria (tricolore, siamês) |
-| 4 | Acessório de pescoço | coleira, bandana | **atrás da cabeça**, ver regra da coleira |
-| 5 | Cabeça | por raça | só a forma base, nada dentro |
-| 6 | Manchas da cabeça | opcional | cor própria |
-| 7 | Focinho | por raça | a área de pelo claro do focinho |
-| 8 | Nariz | por espécie | |
-| 9 | Boca | neutro, sorriso, lingua | nunca embutida na cabeça/focinho |
-| 10 | Olhos | rotondi, allegri, assonnati, sorpresi, dolci | íris recolorível |
-| 11 | Orelhas | por raça | cão (caídas): **na frente da cabeça** (decisão do Pedro); gato (pontudas): **atrás da cabeça**, logo antes dela |
-| 12 | Acessório de rosto | occhiali | por cima de tudo |
+| #   | Camada               | Variações                                    | Observações                                                                                                     |
+| --- | -------------------- | -------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| 1   | Rabo                 | por espécie                                  | gato sempre; cão opcional                                                                                       |
+| 2   | Corpo                | atletico, robusto                            | só silhueta + patas, cor única de pelo                                                                          |
+| 3   | Manchas do corpo     | opcional                                     | cor própria (tricolore, siamês)                                                                                 |
+| 4   | Acessório de pescoço | coleira, bandana                             | **atrás da cabeça**, ver regra da coleira                                                                       |
+| 5   | Cabeça               | por raça                                     | só a forma base, nada dentro                                                                                    |
+| 6   | Manchas da cabeça    | opcional                                     | cor própria                                                                                                     |
+| 7   | Focinho              | por raça                                     | a área de pelo claro do focinho                                                                                 |
+| 8   | Nariz                | por espécie                                  |                                                                                                                 |
+| 9   | Boca                 | neutro, sorriso, lingua                      | nunca embutida na cabeça/focinho                                                                                |
+| 10  | Olhos                | rotondi, allegri, assonnati, sorpresi, dolci | íris recolorível                                                                                                |
+| 11  | Orelhas              | por raça                                     | cão (caídas): **na frente da cabeça** (decisão do Pedro); gato (pontudas): **atrás da cabeça**, logo antes dela |
+| 12  | Acessório de rosto   | occhiali                                     | por cima de tudo                                                                                                |
 
 ## Regras de todas as camadas
 

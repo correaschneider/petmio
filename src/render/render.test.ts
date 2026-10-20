@@ -67,10 +67,10 @@ describe('renderPetSvg', () => {
     expect(renderPetSvg(DEFAULT_TRAITS, { nameTag: '' })).toContain('viewBox="0 0 300 350"');
   });
 
-  it('modo pixel remove os detalhes finos', () => {
+  it('procedural: modo pixel remove os detalhes finos', () => {
     const cat: PetTraits = { ...DEFAULT_TRAITS, species: 'gatto', breed: 'europeo' };
-    const cartoon = renderPetSvg(cat);
-    const pixel = renderPetSvg(cat, { pixel: true });
+    const cartoon = renderProcedural(cat);
+    const pixel = renderProcedural(cat, { pixel: true });
     expect(cartoon).toContain('stroke-width="4"');
     expect(pixel).toContain('stroke-width="9"');
     expect(pixel.length).toBeLessThan(cartoon.length); // sem bigodes/brilhos

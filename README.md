@@ -59,7 +59,8 @@ Detalhes em [`docs/architecture.md`](docs/architecture.md) e
 
 - ✅ Fluxo completo do protótipo: criar (com "Sorprendimi"), nomear, PNG com download real e
   cópia para a área de transferência; estilos Cartoon e Pixel art; tema claro/escuro.
-- 🎨 **Cão com arte real** por camadas (14 peças do Nano Banana vetorizadas e recoloríveis,
-  também no pixel art). Gato ainda procedural; faltam boca neutra, óculos no estilo e o set de
-  gato (ver `docs/art-pipeline.md`). Galeria de conferência em `/dev/galleria` (só dev).
+- 🎨 **Arte vetorial em camadas** (guias do Recraft → `art/layers/`): labrador, beagle, carlino,
+  gato europeu e siamês; 5 estilos de olho, 3 bocas, coleira/bandana/óculos trocáveis entre
+  modelos, recoloração do pelo, pixel art. Persa ainda usa o modelo do europeu. Galeria em
+  `/dev/galleria` (só dev).
 - 🛒 Tela **Prodotti** e integração print-on-demand: fase futura.

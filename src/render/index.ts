@@ -1,11 +1,11 @@
-import { renderLayered } from './layered';
+import { renderVector } from './vector';
 import type { PetRenderer } from './types';
 
 export * from './types';
 export { escapeXml } from './svg';
 
 /**
- * Renderer ativo: arte vetorizada por camadas, com fallback procedural no que ainda não tem
- * peça (ver `layered/index.ts`).
+ * Renderer ativo: camadas vetoriais dos guias do Recraft (`render/vector`). O procedural fica
+ * só como utilitário (plaquinha do nome) e referência.
  */
-export const renderPetSvg: PetRenderer = renderLayered;
+export const renderPetSvg: PetRenderer = renderVector;

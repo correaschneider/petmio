@@ -141,7 +141,9 @@ def floppy_ears(fur: BaseGeometry, left_poly: list[tuple[float, float]]) -> tupl
     right = Polygon([(1024 - x, y) for x, y in left_poly])
     cut = unary_union([left, right])
     fur = solid(fur)
-    ears = [p for p in (fur.intersection(left), fur.intersection(right)) if not p.is_empty]
+    # A orelha avança 3 px sobre a cabeça na emenda do corte: sem isso o antialias desenha um fio
+    # entre duas áreas da mesma cor.
+    ears = [p.union(p.buffer(3).intersection(fur)) for p in (fur.intersection(left), fur.intersection(right)) if not p.is_empty]
     visible_head = fur.difference(cut)
     head = solid(visible_head).convex_hull
     return head, ears, visible_head
@@ -235,14 +237,33 @@ def build(name: str) -> Model:
             m.items.append(Item(layer, g, fill, role, outline_of(visible) if has_outline else None,
                                 rule.get("opacity", 1.0)))
 
+    # Acessórios precisam poder SAIR sem deixar buraco: preenche por baixo com o pelo da camada
+    # de baixo (corpo sob coleira/bandana, cabeça sob os óculos).
+    def main_item(layer: str) -> Item | None:
+        cands = [it for it in m.items if it.layer == layer and it.role not in ("line", "outline")]
+        return max(cands, key=lambda it: it.geom.area, default=None)
+
+    for acc_layer, under in (("neck-accessory", "body"), ("face-accessory", "head")):
+        acc = unary_union([it.geom.union(it.outline or Polygon()) for it in m.items if it.layer == acc_layer])
+        host = main_item(under)
+        if acc.is_empty or host is None:
+            continue
+        hull = unary_union([it.geom for it in m.items if it.layer in ("body", "head", "muzzle")]).convex_hull
+        filler = acc.buffer(4).intersection(hull)
+        m.items.insert(m.items.index(host) + 1, Item(under, filler, host.fill, host.role))
+
     # Linhas que não encostam em nenhuma forma (bigodes fora da cabeça, armação longe da lente...).
     covered = unary_union([it.outline for it in m.items if it.outline is not None])
     rest = dark.difference(covered.buffer(1)).buffer(-0.8).buffer(0.8)
     for p in parts(rest):
         if p.area < cfg.get("min_line_area", 60):
             continue
-        layer = next((r["layer"] for r in cfg.get("lines", []) if r["box"].contains(p.centroid)),
-                     cfg.get("lines_default"))
+        # Traço dentro de um acessório (aro da plaquinha, armação) é do acessório.
+        # Idem boca/nariz/olhos: ao trocar a boca, as linhas da boca antiga têm que sair junto.
+        acc_layer = next((it.layer for it in m.items if it.layer in ("neck-accessory", "face-accessory", "mouth", "nose", "eyes")
+                          and it.geom.buffer(t * 2).contains(p.centroid)), None)
+        layer = acc_layer or next((r["layer"] for r in cfg.get("lines", []) if r["box"].contains(p.centroid)),
+                                  cfg.get("lines_default"))
         if layer:
             m.items.append(Item(layer, p, m.outline_color, "line"))
 
@@ -283,10 +304,78 @@ def to_svg(m: Model, only: str | None = None) -> str:
             + "".join(groups) + "</svg>")
 
 
+# ---------------------------------------------------------------- export para o app
+
+TS_OUT = ROOT / "src" / "render" / "vector" / "models.generated.ts"
+
+
+def bbox(m: Model, layer: str) -> list[float] | None:
+    g = unary_union([it.geom for it in m.items if it.layer == layer])
+    return None if g.is_empty else [round(v, 1) for v in g.bounds]
+
+
+def anchors(m: Model) -> dict:
+    """Pontos de encaixe usados para trocar peças entre modelos (olhos, boca, acessórios)."""
+    eyes_geom = unary_union([it.geom for it in m.items if it.layer == "eyes"])
+    eyes = sorted((p for p in parts(eyes_geom.buffer(3).buffer(-3)) if p.area > 400), key=lambda p: -p.area)[:2]
+    eyes = sorted(eyes, key=lambda p: p.centroid.x)
+    a = {
+        "eyes": [{"cx": round(p.centroid.x, 1), "cy": round(p.centroid.y, 1),
+                  "r": round(math.sqrt(p.area / math.pi), 1)} for p in eyes],
+        "head": bbox(m, "head"),
+        "nose": bbox(m, "nose"),
+        "mouth": bbox(m, "mouth"),
+        "body": bbox(m, "body"),
+        "neck": bbox(m, "neck-accessory"),
+        "glasses": bbox(m, "face-accessory"),
+        # cabeça + focinho + boca: o "rosto" inteiro (no beagle o focinho branco desce além da cabeça)
+        "face": [round(v, 1) for v in unary_union(
+            [it.geom for it in m.items if it.layer in ("head", "muzzle", "mouth", "head-spots")]).bounds],
+    }
+    return a
+
+
+def export_ts(models: list[Model]) -> None:
+    import json
+
+    def entry(it: Item) -> list[dict]:
+        out = []
+        if it.outline is not None and not it.outline.is_empty:
+            out.append({"d": geom_d(it.outline), "role": "outline"})
+        e = {"d": geom_d(it.geom), "role": it.role, "fill": it.fill}
+        if it.opacity < 1:
+            e["opacity"] = it.opacity
+        out.append(e)
+        return out
+
+    data = {}
+    for m in models:
+        cfg = MODELS[m.name]
+        layers: dict[str, list[dict]] = {}
+        for it in m.items:
+            layers.setdefault(it.layer, []).extend(entry(it))
+        data[cfg["breed"]] = {
+            "species": cfg["species"],
+            "stroke": round(m.stroke, 1),
+            "outline": m.outline_color,
+            "anchors": anchors(m),
+            "layers": layers,
+        }
+    TS_OUT.parent.mkdir(parents=True, exist_ok=True)
+    TS_OUT.write_text(
+        "// GERADO por scripts/art/build_layers.py — não editar à mão.\n"
+        "// Camadas vetoriais de cada modelo (enquadramento 1024×1024 do guia do Recraft).\n"
+        "import type { VectorModel } from './types';\n\n"
+        f"export const VECTOR_MODELS = {json.dumps(data, separators=(',', ':'))} as const satisfies Record<string, VectorModel>;\n"
+    )
+    print(f"→ {TS_OUT.relative_to(ROOT)} ({TS_OUT.stat().st_size / 1024:.0f} KB)")
+
+
 def main() -> None:
     OUT.mkdir(parents=True, exist_ok=True)
     PREVIEW.mkdir(parents=True, exist_ok=True)
     names = sys.argv[1:] or list(MODELS)
+    built: list[Model] = []
     for name in names:
         m = build(name)
         svg = to_svg(m)
@@ -302,6 +391,9 @@ def main() -> None:
                                  output_width=220, background_color="#eef2f6")
         layers = [l for l in order if any(it.layer == l for it in m.items)]
         print(f"{name}: contorno {m.stroke:.1f}px · camadas: {', '.join(layers)} · {len(svg) / 1024:.0f} KB")
+        built.append(m)
+    if not sys.argv[1:]:
+        export_ts(built)
 
 
 if __name__ == "__main__":

@@ -28,6 +28,8 @@ Z_CAT = [
 
 MODELS = {
     "gatto-europeo": {
+        "species": "gatto",
+        "breed": "europeo",
         "guide": "gatto-europeo-guia.svg",
         "silhouette": 1,
         "drop": [0, 2],
@@ -49,6 +51,8 @@ MODELS = {
         ],
     },
     "gatto-siamese": {
+        "species": "gatto",
+        "breed": "siamese",
         "guide": "gatto-siamese-guia.svg",
         "silhouette": 1,
         "drop": [0, 19],
@@ -64,7 +68,8 @@ MODELS = {
             {"layer": "eyes", "paths": [8, 9, 10, 11, 12, 13], "role": "eye"},
             {"layer": "body", "paths": [25, 26, 27, 28], "outline": True, "role": "spot"},
             {"layer": "body", "paths": [14], "outline": True, "extend_up": 60},
-            {"layer": "body-spots", "paths": [15, 16, 17, 18], "role": "fur-shade"},
+            {"layer": "body-spots", "paths": [15, 16], "role": "fur-shade"},
+            {"layer": "neck-accessory", "paths": [17, 18], "role": "fur-shade"},  # sombra da coleira
             {"layer": "tail", "paths": [22], "outline": True, "role": "spot"},
             {"layer": "neck-accessory", "paths": [30, 31, 29], "outline": True, "role": "collar"},
         ],
@@ -73,6 +78,8 @@ MODELS = {
                   {"box": box(620, 400, 880, 560), "layer": "whiskers"}],
     },
     "cane-beagle": {
+        "species": "cane",
+        "breed": "beagle",
         "guide": "cane-beagle-guia.svg",
         "silhouette": 1,
         "drop": [0, 10, 27, 28],
@@ -81,13 +88,13 @@ MODELS = {
              "ear_poly": [(200, 180), (420, 190), (400, 280), (424, 460), (440, 640), (200, 640)]},
             {"layer": "head", "paths": [25, 26], "outline": True},
             {"layer": "head-spots", "paths": [3], "role": "spot"},
-            {"layer": "muzzle", "paths": [7], "solid": True, "role": "fur-light"},
+            {"layer": "muzzle", "paths": [7], "solid": True, "role": "white"},
             {"layer": "mouth", "paths": [12, 8, 9], "role": "line"},
             {"layer": "nose", "paths": [11], "role": "line"},
             {"layer": "eyes", "paths": [14, 15, 16, 18, 19, 20], "role": "eye"},
             {"layer": "face-accessory", "paths": [13, 17], "role": "lens", "outline": True, "solid": False, "opacity": 0.35},
-            {"layer": "body", "paths": [21, 23], "outline": True, "role": "fur-light"},
-            {"layer": "body", "paths": [4], "outline": True, "extend_up": 60, "role": "fur-light"},
+            {"layer": "body", "paths": [21, 23], "outline": True, "role": "white"},
+            {"layer": "body", "paths": [4], "outline": True, "extend_up": 60, "role": "white"},
             {"layer": "body-spots", "paths": [5, 6, 22, 24], "role": "spot"},
         ],
         "lines": [{"box": box(320, 270, 705, 430), "layer": "face-accessory"},
@@ -95,6 +102,8 @@ MODELS = {
         "lines_default": "head-spots",
     },
     "cane-pug": {
+        "species": "cane",
+        "breed": "pug",
         "guide": "cane-pug-guia.svg",
         "silhouette": 1,
         "drop": [0, 27, 28],
@@ -115,6 +124,8 @@ MODELS = {
         "lines_default": "head-spots",
     },
     "cane-labrador": {
+        "species": "cane",
+        "breed": "labrador",
         "guide": "cane-labrador-guia.svg",
         "silhouette": 1,
         "min_line_area": 250,  # sobras da textura do guia
@@ -128,7 +139,9 @@ MODELS = {
             {"layer": "mouth", "paths": [21], "role": "line"},
             {"layer": "eyes", "paths": [14, 16, 17, 18, 19, 20], "role": "eye"},
             {"layer": "body", "paths": [36], "outline": True, "extend_up": 60},
-            {"layer": "body-spots", "paths": [37, 38, 39, 40, 41, 45], "role": "fur-shade"},
+            {"layer": "body-spots", "paths": [37, 40, 41, 45], "role": "fur-shade"},
+            # 38/39 = sombra que a coleira projeta no peito: só existe com a coleira.
+            {"layer": "neck-accessory", "paths": [38, 39], "role": "fur-shade"},
             {"layer": "neck-accessory", "paths": [47, 48, 46], "outline": True, "role": "collar"},
         ],
         "lines": [{"box": box(0, 600, 1024, 1024), "layer": "body"}],

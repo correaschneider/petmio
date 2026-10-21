@@ -4,12 +4,18 @@ import {
   PATCH_COLORS,
   optionsFor,
   type PetTraits,
+  type Species,
   type TraitKey,
 } from '@/domain/pet';
 import type { Messages } from '@/i18n';
 
 /** Ordem e tipo de controle de cada traço no passo "Crea" (data-driven). */
-export const TRAIT_FIELDS: readonly { key: TraitKey; control: 'chips' | 'swatches' }[] = [
+/** `only`: o traço só existe nessa espécie (o campo some nas outras). */
+export const TRAIT_FIELDS: readonly {
+  key: TraitKey;
+  control: 'chips' | 'swatches';
+  only?: Species;
+}[] = [
   { key: 'style', control: 'chips' },
   { key: 'species', control: 'chips' },
   { key: 'breed', control: 'chips' },
@@ -19,6 +25,7 @@ export const TRAIT_FIELDS: readonly { key: TraitKey; control: 'chips' | 'swatche
   { key: 'eyeColor', control: 'swatches' },
   { key: 'mouth', control: 'chips' },
   { key: 'acc', control: 'chips' },
+  { key: 'whiskers', control: 'chips', only: 'gatto' },
 ];
 
 const TRICOLOR_SWATCH = `linear-gradient(135deg, ${FUR_COLORS.tricolore.base} 0 40%, ${PATCH_COLORS.warm} 40% 70%, ${PATCH_COLORS.dark} 70%)`;

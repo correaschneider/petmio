@@ -3,7 +3,13 @@
  * guia. Cinco estilos do catálogo; a íris usa a cor escolhida.
  */
 import type { Eyes } from '@/domain/pet';
-import type { EyeAnchor, VectorModel } from './types';
+import type { EyeAnchor } from './types';
+
+/** Cor e espessura do traço do modelo (contorno dos olhos). */
+export interface EyeLine {
+  readonly outline: string;
+  readonly stroke: number;
+}
 
 const PUPIL = '#1a1414';
 const WHITE = '#ffffff';
@@ -28,7 +34,7 @@ export function drawEyes(
   eyes: readonly EyeAnchor[],
   style: Eyes,
   iris: string,
-  model: VectorModel,
+  model: EyeLine,
   fur: string,
 ): string {
   const o = model.outline;

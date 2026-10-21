@@ -8,6 +8,7 @@ import type {
   Mouth,
   Species,
   Style,
+  Whiskers,
 } from '@/domain/pet';
 
 /**
@@ -41,6 +42,7 @@ export const it = {
     eyeColor: { label: 'Colore degli occhi' },
     mouth: { label: 'Bocca' },
     acc: { label: 'Accessorio' },
+    whiskers: { label: 'Baffi' },
   },
   options: {
     style: { cartoon: 'Cartoon', pixel: 'Pixel art' } satisfies Record<Style, string>,
@@ -87,6 +89,7 @@ export const it = {
       bandana: 'Bandana',
       occhiali: 'Occhiali',
     } satisfies Record<Accessory, string>,
+    whiskers: { due: '2 per lato', tre: '3 per lato' } satisfies Record<Whiskers, string>,
   },
   name: {
     title: 'Come si chiama?',

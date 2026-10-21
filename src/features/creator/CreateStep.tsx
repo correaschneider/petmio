@@ -65,25 +65,27 @@ export function CreateStep() {
           subtitle={t.create.surpriseHint}
           onClick={shuffle}
         />
-        {TRAIT_FIELDS.map(({ key, control }) => {
-          const field = t.fields[key];
-          const options = fieldOptions(key, traits, t);
-          const onChange = (value: string) =>
-            dispatch({ type: 'setTrait', key, value: value as PetTraits[typeof key] });
-          return (
-            <OptionGroup
-              key={key}
-              label={field.label}
-              hint={'hint' in field ? field.hint : undefined}
-            >
-              {control === 'swatches' ? (
-                <ColorSwatches options={options} value={traits[key]} onChange={onChange} />
-              ) : (
-                <ChoiceChips options={options} value={traits[key]} onChange={onChange} />
-              )}
-            </OptionGroup>
-          );
-        })}
+        {TRAIT_FIELDS.filter(({ only }) => !only || only === traits.species).map(
+          ({ key, control }) => {
+            const field = t.fields[key];
+            const options = fieldOptions(key, traits, t);
+            const onChange = (value: string) =>
+              dispatch({ type: 'setTrait', key, value: value as PetTraits[typeof key] });
+            return (
+              <OptionGroup
+                key={key}
+                label={field.label}
+                hint={'hint' in field ? field.hint : undefined}
+              >
+                {control === 'swatches' ? (
+                  <ColorSwatches options={options} value={traits[key]} onChange={onChange} />
+                ) : (
+                  <ChoiceChips options={options} value={traits[key]} onChange={onChange} />
+                )}
+              </OptionGroup>
+            );
+          },
+        )}
         <Stack direction="row" sx={{ justifyContent: 'flex-end' }}>
           <Button variant="contained" onClick={() => dispatch({ type: 'goTo', step: 'name' })}>
             {t.create.next}

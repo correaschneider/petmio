@@ -16,6 +16,15 @@ describe('withTrait', () => {
     expect(withTrait(DEFAULT_TRAITS, 'breed', 'siamese')).toBe(DEFAULT_TRAITS);
   });
 
+  it('cada escolha do tricolor sorteia um padrão novo (inclusive repetindo o tricolor)', () => {
+    const a = withTrait(DEFAULT_TRAITS, 'fur', 'tricolore', () => 0.5);
+    expect(a.fur).toBe('tricolore');
+    const b = withTrait(a, 'fur', 'tricolore', () => 0.5);
+    expect(b).not.toBe(a);
+    expect(b.pattern).not.toBe(a.pattern);
+    expect(withTrait(a, 'fur', 'nero').pattern).toBe(a.pattern);
+  });
+
   it('não muta o objeto original', () => {
     const next = withTrait(DEFAULT_TRAITS, 'fur', 'nero');
     expect(next.fur).toBe('nero');

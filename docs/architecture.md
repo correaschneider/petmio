@@ -13,10 +13,10 @@ i18n ──► todos os componentes (nenhum texto hardcoded em JSX)
   espécie reseta a raça), sorteio com RNG injetável (`surprise` nunca repete o valor atual),
   normalização do nome. Sem React, sem DOM: 100% testável.
 - **`render`** — contrato `PetRenderer = (traits, options) => string (SVG)`. O renderer ativo
-  (`render/index.ts`) é o **vetorial** (`render/vector/`): camadas dos guias do Recraft geradas por
-  `scripts/art/build_layers.py` (`models.generated.ts`). A raça escolhe o modelo; olhos são
-  desenhados nas âncoras do modelo, boca e acessórios são transplantados de outro modelo pelas
-  âncoras (nariz, pescoço, olhos). O procedural (`render/procedural/`) segue como utilitário
+  (`render/index.ts`) é o **vetorial** (`render/vector/`): monta as peças finais de `models/`
+  (`parts.generated.ts`, gerado por `scripts/art/build_parts.py`). Peças da raça (corpo, cabeça,
+  orelhas dos cães) + peças comuns da espécie (boca, nariz, bigodes, acessórios), levadas do rosto
+  base (labrador / europeu) ao da raça pelo `FIT`; olhos desenhados em código nas âncoras da raça. O procedural (`render/procedural/`) segue como utilitário
   (plaquinha do nome). Pixel art e PNG ficam em `raster.ts` e
   `export-png.ts` e só dependem do contrato — trocar o renderer não mexe neles.
 - **`theme`** — `tokens.ts` é a fonte única de cor. `theme.ts` monta o tema MUI com
@@ -44,8 +44,8 @@ i18n ──► todos os componentes (nenhum texto hardcoded em JSX)
   substituindo o `renderSeq` global do protótipo; o status é derivado da última render concluída.
 - **Download real** (`<a download>`) + cópia via `ClipboardItem`.
 
-- **Modelos no bundle:** `models.generated.ts` ≈ 140 KB (5 modelos). Se crescer, carregar por
-  espécie com `import()` dinâmico.
+- **Peças no bundle:** `parts.generated.ts` ≈ 190 KB (31 peças, 6 raças). Se crescer, carregar
+  por espécie com `import()` dinâmico.
 
 ## Bugs do protótipo que não podem voltar
 

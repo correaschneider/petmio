@@ -8,6 +8,7 @@ import {
   MOUTHS,
   SPECIES,
   STYLES,
+  WHISKERS,
   type Accessory,
   type Body,
   type Breed,
@@ -17,6 +18,7 @@ import {
   type Mouth,
   type Species,
   type Style,
+  type Whiskers,
 } from './catalog';
 
 /** Tudo o que define a aparência do avatar (sem o nome). */
@@ -30,9 +32,17 @@ export interface PetTraits {
   eyeColor: EyeColor;
   mouth: Mouth;
   acc: Accessory;
+  /** Bigode do gato (os cães não têm). */
+  whiskers: Whiskers;
+  /**
+   * Variação da pelagem tricolor: qual cor vai em cada parte. Sorteado a cada escolha do tricolor
+   * (o renderer é puro: mesmo padrão → mesmo desenho). Ignorado nas outras pelagens.
+   */
+  pattern: number;
 }
 
-export type TraitKey = keyof PetTraits;
+/** Traços escolhidos pelo usuário (o `pattern` é sorteado, não tem opções). */
+export type TraitKey = Exclude<keyof PetTraits, 'pattern'>;
 
 export const DEFAULT_TRAITS: PetTraits = {
   style: 'cartoon',
@@ -44,7 +54,17 @@ export const DEFAULT_TRAITS: PetTraits = {
   eyeColor: 'marrone',
   mouth: 'sorriso',
   acc: 'nessuno',
+  whiskers: 'due',
+  pattern: 0,
 };
+
+/**
+ * Próximo padrão do tricolor: anda de 1 a 5 posições. O renderer usa `pattern` módulo as
+ * combinações da raça (todas têm pelo menos 6), então o clique seguinte nunca repete a anterior.
+ */
+export function nextPattern(current: number, rng: () => number = Math.random): number {
+  return current + 1 + Math.floor(rng() * 5);
+}
 
 /** Valores possíveis de cada traço. `breed` depende da espécie atual. */
 export function optionsFor<K extends TraitKey>(
@@ -61,6 +81,7 @@ export function optionsFor<K extends TraitKey>(
     eyeColor: EYE_COLORS,
     mouth: MOUTHS,
     acc: ACCESSORIES,
+    whiskers: WHISKERS,
   };
   return table[key];
 }
@@ -77,7 +98,11 @@ export function withTrait<K extends TraitKey>(
   traits: PetTraits,
   key: K,
   value: PetTraits[K],
+  rng: () => number = Math.random,
 ): PetTraits {
+  // Tricolor: cada escolha (inclusive repetir a que já está) sorteia qual cor vai em cada parte.
+  if (key === 'fur' && value === 'tricolore')
+    return { ...traits, fur: 'tricolore', pattern: nextPattern(traits.pattern, rng) };
   if (key === 'species') {
     const species = value as Species;
     if (species === traits.species) return traits;

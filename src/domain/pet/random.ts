@@ -1,4 +1,4 @@
-import { optionsFor, type PetTraits, type TraitKey } from './traits';
+import { nextPattern, optionsFor, type PetTraits, type TraitKey } from './traits';
 
 /** Fonte de aleatoriedade injetável (testes passam uma determinística). */
 export type Rng = () => number;
@@ -24,6 +24,7 @@ const ALWAYS_CHANGE: readonly TraitKey[] = [
   'eyeColor',
   'mouth',
   'acc',
+  'whiskers',
 ];
 
 export function surprise(current: PetTraits, rng: Rng = Math.random): PetTraits {
@@ -38,5 +39,6 @@ export function surprise(current: PetTraits, rng: Rng = Math.random): PetTraits 
       rng,
     );
   }
+  if (next.fur === 'tricolore') next.pattern = nextPattern(current.pattern, rng);
   return next;
 }

@@ -42,7 +42,7 @@ export default function GalleryPage() {
       items: FURS.map((fur) => ({ ...DEFAULT_TRAITS, fur, eyeColor: 'azzurro' as const })),
     },
     {
-      title: 'Gatti (procedurale)',
+      title: 'Gatti',
       items: BREEDS_BY_SPECIES.gatto.map((breed) => ({
         ...DEFAULT_TRAITS,
         species: 'gatto' as const,

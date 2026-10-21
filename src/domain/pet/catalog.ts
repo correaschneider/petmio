@@ -23,6 +23,8 @@ export const EYES = ['rotondi', 'allegri', 'assonnati', 'sorpresi', 'dolci'] as 
 export const EYE_COLORS = ['marrone', 'ambra', 'azzurro', 'verde'] as const;
 export const MOUTHS = ['sorriso', 'lingua', 'neutro'] as const;
 export const ACCESSORIES = ['nessuno', 'collare', 'bandana', 'occhiali'] as const;
+/** Fios do bigode de cada lado (só gatos). */
+export const WHISKERS = ['due', 'tre'] as const;
 
 export type Style = (typeof STYLES)[number];
 export type Species = (typeof SPECIES)[number];
@@ -35,6 +37,7 @@ export type Eyes = (typeof EYES)[number];
 export type EyeColor = (typeof EYE_COLORS)[number];
 export type Mouth = (typeof MOUTHS)[number];
 export type Accessory = (typeof ACCESSORIES)[number];
+export type Whiskers = (typeof WHISKERS)[number];
 
 export const BREEDS_BY_SPECIES = {
   cane: DOG_BREEDS,

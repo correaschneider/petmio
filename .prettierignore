@@ -6,3 +6,5 @@ art
 docs/prototype-cagnolino.html
 docs/CONTEXT.md
 src/render/vector/models.generated.ts
+src/render/vector/parts.generated.ts
+models/

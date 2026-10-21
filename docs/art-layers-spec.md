@@ -54,3 +54,30 @@
   cabeça completada pela envoltória convexa; corpo estendido por
   baixo da cabeça.
 - Prévias em `.preview/layers/` (montado, guia e cada camada sozinha).
+
+## Peças finais (`models/`) — o que o app usa
+
+> Decidido em 20/10/2026, depois de montar peça a peça com o Pedro.
+
+- **Uma peça por arquivo**, todas no quadro 1024×1024 do guia, cada uma no seu lugar (empilhar os
+  arquivos monta o pet). Nome: `<raça>-<parte>[-<variação>]` (`labrador-corpo-atletico`,
+  `persiano-cabeca`) e **peças comuns da espécie** `cane-*` / `gatto-*` (bocas, nariz, bigodes,
+  acessórios, olhos), desenhadas no rosto do modelo base (labrador / europeu).
+- **Bigode** (gatos): 2 ou 3 fios por lado (`gatto-bigodes` / `gatto-bigodes-tres`), traço `whiskers`.
+- **Tricolor:** branco, caramelo e escuro distribuídos por cabeça/orelhas/corpo/pontas conforme o
+  `pattern` do pet, sorteado a cada clique no tricolor (`render/vector/tricolor.ts`).
+- **Peças por raça:** corpo atlético; cabeça (com focinho e manchas; nos gatos, com as orelhas);
+  orelhas dos cães (na frente da cabeça). O **robusto** não é arquivo: é o atlético esticado 1,14×
+  em torno do centro do corpo.
+- **FIT:** para cada raça, como levar cada peça comum do rosto base ao da raça (ponto de → para +
+  escala; olhos um de cada vez). Fonte única em `models/fit.json` (com os olhos base e os centros
+  do robusto); `build_parts.py` gera dele o app e o `models/fit.js` que a bancada carrega.
+- **Olhos no app:** desenhados em código (5 estilos, íris recolorível) nas âncoras da raça; os SVGs
+  `*-olhos-*` são só para a bancada.
+- **Gerar:** `uv run scripts/art/build_parts.py` → `src/render/vector/parts.generated.ts`. As cores
+  com papel `fur`/`fur-shade`/`fur-light` viram marcadores e seguem o pelo escolhido.
+- **Scripts das peças** (`scripts/art/models/`): `make_parts.py` (peças a partir das camadas:
+  corpos, cabeças de cão, orelhas; ombros que sobem por baixo da cabeça), `labrador_head.py`,
+  `cat_head.py`/`siamese_head.py`/`persian_head.py` (cabeça+orelhas do gato direto do guia),
+  `persian_body_raw.py` (corpo do persa com as formas do guia), `png2svg.py` (peça desenhada à mão
+  em PNG → SVG, como a orelha do labrador).

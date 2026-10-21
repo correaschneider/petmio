@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <!-- Nariz de gato (camada "nose" do europeu).
+       Serve para todos os gatos; posição do europeu (modelo base dos gatos). Quadro 1024 do guia. -->
+  <g id="nose">
+    <path data-role="pink" fill="#ed726e" d="M493.3 482.3 L503.5 481.9 L512.8 475.1 L521.7 466.0 L530.4 454.8 L535.7 445.6 L536.2 439.9 L533.7 435.6 L527.3 432.0 L519.2 429.8 L492.4 427.6 L480.0 428.3 L469.4 430.2 L462.2 433.1 L458.2 436.5 L456.4 441.0 L456.8 445.1 L465.0 458.9 L472.4 467.7 L480.8 475.6 L488.1 480.5 L493.3 482.3Z"/>
+  </g>
+</svg>

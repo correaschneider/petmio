@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <!-- Olhos "sorpresi" de cão (estilo do app, src/render/vector/eyes.ts), íris marrom, na posição e
+       tamanho dos olhos do labrador. Quadro 1024 do guia. -->
+  <g id="eyes"><circle cx="400.7" cy="360.6" r="48.4" fill="#ffffff" stroke="#542814" stroke-width="10.1"/><circle cx="400.7" cy="365.2" r="19.4" fill="#4a2e1a"/><circle cx="400.7" cy="365.2" r="11.1" fill="#1a1414"/><circle cx="395.2" cy="358.8" r="4.6" fill="#ffffff"/><circle cx="616.9" cy="360.3" r="48.8" fill="#ffffff" stroke="#542814" stroke-width="10.1"/><circle cx="616.9" cy="364.9" r="19.5" fill="#4a2e1a"/><circle cx="616.9" cy="364.9" r="11.2" fill="#1a1414"/><circle cx="611.3" cy="358.4" r="4.7" fill="#ffffff"/></g>
+</svg>

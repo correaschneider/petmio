@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <!-- Bigodes de gato: 3 fios de cada lado em leque (em cima subindo, no meio quase reto, embaixo
+       descendo), na espessura e no lugar dos fios do guia do europeu; direita = espelho da esquerda.
+       Serve para todos os gatos; posição do europeu (modelo base dos gatos). Quadro 1024 do guia. -->
+  <g id="whiskers">
+    <path data-role="line" d="M415 468 L306 432 M413 487 L302 481 M409 506 L308 528 M582.5 468 L691.5 432 M584.5 487 L695.5 481 M588.5 506 L689.5 528" fill="none" stroke="#4a2310" stroke-width="11.2" stroke-linecap="round"/>
+  </g>
+</svg>

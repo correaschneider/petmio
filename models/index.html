@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Peças dos pets</title>
+<style>
+  body { margin: 0; padding: 16px; font-family: system-ui, sans-serif; background: #f4f1ea; color: #222; }
+  .stage { position: relative; width: min(100%, 600px); aspect-ratio: 1; background: #fff; border-radius: 12px; }
+  .stage img { position: absolute; inset: 0; width: 100%; height: 100%; }
+  label { display: block; margin: 4px 0; cursor: pointer; }
+  .wrap { display: flex; gap: 24px; flex-wrap: wrap; align-items: flex-start; }
+  select { font: inherit; margin-bottom: 8px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="stage" id="stage"></div>
+  <div>
+    <select id="breed">
+      <optgroup label="Cães">
+        <option value="labrador">Labrador</option>
+        <option value="beagle">Beagle</option>
+        <option value="pug">Carlino</option>
+      </optgroup>
+      <optgroup label="Gatos">
+        <option value="europeo">Europeu</option>
+        <option value="siamese">Siamês</option>
+        <option value="persiano">Persa</option>
+      </optgroup>
+    </select>
+    <select id="olhos">
+      <option value="olhos">olhos do guia</option>
+      <option value="olhos-rotondi">rotondi</option>
+      <option value="olhos-allegri">allegri</option>
+      <option value="olhos-assonnati">assonnati</option>
+      <option value="olhos-sorpresi">sorpresi</option>
+      <option value="olhos-dolci">dolci</option>
+    </select>
+    <select id="bigodes" title="bigodes (só gatos)">
+      <option value="gatto-bigodes">bigodes: 2 fios</option>
+      <option value="gatto-bigodes-tres">bigodes: 3 fios</option>
+    </select>
+    <select id="acc">
+      <option value="">nenhum acessório</option>
+      <option value="coleira">coleira</option>
+      <option value="bandana">bandana</option>
+      <option value="oculos">óculos</option>
+    </select>
+    <label><input type="checkbox" id="robusto"> corpo robusto (atlético esticado)</label>
+    <div id="layers"></div>
+  </div>
+</div>
+<script src="fit.js"></script>
+<script>
+  const CFG = window.PETMIO_FIT;  // models/fit.js, gerado de models/fit.json (fonte única)
+  const SPECIES = CFG.species;
+
+  // Ordem de desenho (de trás para frente). `{raça}` vira a raça; `{esp}` vira a espécie (peças comuns:
+  // cane-* para os cães, gatto-* para os gatos); `{olhos}` vira o estilo escolhido.
+  // on = ligada ao abrir; only = só nessa espécie; acc = acessório (aparece pelo seletor).
+  // Cão: orelha caída NA FRENTE da cabeça. Gato: orelha pontuda ATRÁS da cabeça.
+  const LAYERS = [
+    { file: '{raça}-corpo-atletico', on: true, body: true },
+    { file: '{esp}-acessorio-coleira', acc: 'coleira', part: 'pescoco' },
+    { file: '{esp}-acessorio-bandana', acc: 'bandana', part: 'pescoco' },
+    { file: '{raça}-orelha', on: true, only: 'gatto', not: ['europeo', 'siamese', 'persiano'] },  // orelha dentro da cabeça
+    { file: '{raça}-cabeca', on: true },
+    { file: '{esp}-boca-sorriso', on: true, part: 'boca' },
+    { file: '{esp}-boca-lingua', part: 'boca' },
+    { file: '{esp}-boca-neutra', part: 'boca' },
+    { file: '{esp}-nariz', on: true, part: 'nariz' },
+    { file: '{esp}-{olhos}', on: true, part: 'olho-esq', clip: 'inset(0 50% 0 0)' },
+    { file: '{esp}-{olhos}', on: true, part: 'olho-dir', clip: 'inset(0 0 0 50%)' },
+    { file: '{bigodes}', on: true, part: 'bigodes', only: 'gatto' },
+    { file: '{raça}-orelha', on: true, only: 'cane' },
+    { file: '{esp}-acessorio-oculos', acc: 'oculos', part: 'oculos' },
+  ];
+
+  // Peças comuns estão no rosto do modelo base da espécie (labrador / europeu). Para outra raça: leva
+  // o ponto `from` (base) ao ponto `to` (raça) e escala por `s` em volta dele. Olhos: um de cada vez
+  // (metade recortada), senão encolher os dois juntos aproxima um do outro.
+  const FIT = CFG.fit;
+  function fit(img, breed, part) {
+    const f = FIT[breed]?.[part];
+    if (!f) return;
+    const pct = (v) => `${(v / 1024) * 100}%`;
+    img.style.transformOrigin = `${pct(f.from[0])} ${pct(f.from[1])}`;
+    img.style.transform = `translate(${pct(f.to[0] - f.from[0])}, ${pct(f.to[1] - f.from[1])}) scale(${f.s})`;
+  }
+
+  // Corpo robusto = atlético esticado na horizontal em torno do centro do corpo (ROBUST_WIDEN do app).
+  const ROBUST = { k: 1.14, cx: CFG.robustCx };
+
+  const stage = document.getElementById('stage');
+  const box = document.getElementById('layers');
+  const breedSel = document.getElementById('breed');
+  const olhosSel = document.getElementById('olhos');
+  const accSel = document.getElementById('acc');
+  const bigodesSel = document.getElementById('bigodes');
+  const robusto = document.getElementById('robusto');
+  const key = (l) => l.file + (l.part ? `#${l.part}` : '') + (l.only ? `@${l.only}` : '');
+  const state = Object.fromEntries(LAYERS.map((l) => [key(l), !!l.on]));
+
+  function render() {
+    const breed = breedSel.value;
+    const esp = SPECIES[breed];
+    stage.replaceChildren();
+    box.replaceChildren();
+    for (const l of LAYERS) {
+      if (l.only && l.only !== esp) continue;
+      if (l.not?.includes(breed)) continue;
+      if (l.acc && l.acc !== accSel.value) continue;  // acessório: só o escolhido no seletor
+      const name = l.file.replace('{raça}', breed).replace('{esp}', esp).replace('{olhos}', olhosSel.value).replace('{bigodes}', bigodesSel.value);
+      const img = document.createElement('img');
+      img.src = `${name}.svg`;
+      img.alt = '';
+      img.hidden = !l.acc && !state[key(l)];
+      if (l.clip) img.style.clipPath = l.clip;
+      fit(img, breed, l.part);
+      if (l.body && robusto.checked) {
+        img.style.transformOrigin = `${(ROBUST.cx[breed] / 1024) * 100}% 50%`;
+        img.style.transform = `scaleX(${ROBUST.k})`;
+      }
+      stage.append(img);
+      if (l.acc) continue;
+      const label = document.createElement('label');
+      const cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.checked = state[key(l)];
+      cb.onchange = () => { state[key(l)] = cb.checked; img.hidden = !cb.checked; };
+      label.append(cb, ' ', name + (l.clip ? ` (${l.part})` : ''));
+      box.append(label);
+    }
+  }
+  for (const el of [breedSel, olhosSel, bigodesSel, accSel, robusto]) el.onchange = render;
+  render();
+</script>
+</body>
+</html>

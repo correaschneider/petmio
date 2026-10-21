@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <!-- Boca neutra de cão (serve para as 3 raças; posição do labrador): a boca do carlino (camada "mouth" de art/layers/cane-pug.svg)
+       transplantada como o renderer faz — base do nariz do carlino levada à base do nariz do labrador,
+       escala pela largura da cabeça (0.7350), traço na cor de contorno do labrador e engrossado
+       ~2,1 px de cada lado (a escala afinava o traço; fica com ~14 px, a linha visível do labrador).
+       Quadro 1024 do guia. -->
+  <g id="mouth">
+    <path data-role="line" fill="#542814" d="M501.1 511.9 L471.0 531.6 L468.5 536.3 L470.0 541.8 L474.8 544.5 L479.9 543.2 L489.5 538.4 L508.3 526.8 L534.0 541.3 L539.8 543.7 L545.3 543.7 L547.1 542.7 L549.3 540.1 L550.0 536.6 L549.7 534.5 L546.3 530.6 L537.3 524.5 L517.9 513.3 L516.9 490.3 L515.5 488.5 L502.6 488.5 L501.4 489.2 L501.1 511.9Z"/>
+  </g>
+</svg>

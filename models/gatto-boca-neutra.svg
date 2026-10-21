@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <!-- Boca neutra de gato: traço curto do nariz e um "w" achatado, desenhado como no app
+       (mouthLayer, boca sem modelo de origem).
+       Serve para todos os gatos; posição do europeu (modelo base dos gatos). Quadro 1024 do guia. -->
+  <g id="mouth">
+    <path data-role="line" d="M496.35 482.3 v12.53 M460.55 493.04 Q478.45 505.57 496.35 494.83 Q514.25 505.57 532.15 493.04" fill="none" stroke="#4a2310" stroke-width="13.5" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+</svg>

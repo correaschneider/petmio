@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <!-- Olhos "allegri" de cão (estilo do app, src/render/vector/eyes.ts), íris marrom, na posição e
+       tamanho dos olhos do labrador. Quadro 1024 do guia. -->
+  <g id="eyes"><path d="M361.515 369.82000000000005 Q400.7 312.19500000000005 439.885 369.82000000000005" fill="none" stroke="#542814" stroke-width="14.6" stroke-linecap="round"/><path d="M577.375 369.6 Q616.9 311.475 656.425 369.6" fill="none" stroke="#542814" stroke-width="14.6" stroke-linecap="round"/></g>
+</svg>

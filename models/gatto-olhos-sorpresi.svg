@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <!-- Olhos "sorpresi" de gato (estilo do app, src/render/vector/eyes.ts), íris marrom, na posição e
+       tamanho dos olhos do europeu. Serve para todos os gatos. Quadro 1024 do guia. -->
+  <g id="eyes"><circle cx="384.7" cy="394.8" r="44.0" fill="#ffffff" stroke="#4a2310" stroke-width="12.2"/><circle cx="384.7" cy="399.0" r="17.6" fill="#4a2e1a"/><circle cx="384.7" cy="399.0" r="10.1" fill="#1a1414"/><circle cx="379.7" cy="393.1" r="4.2" fill="#ffffff"/><circle cx="605.7" cy="394.7" r="43.8" fill="#ffffff" stroke="#4a2310" stroke-width="12.2"/><circle cx="605.7" cy="398.9" r="17.5" fill="#4a2e1a"/><circle cx="605.7" cy="398.9" r="10.0" fill="#1a1414"/><circle cx="600.7" cy="393.0" r="4.2" fill="#ffffff"/></g>
+</svg>

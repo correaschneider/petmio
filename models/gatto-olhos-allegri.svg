@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <!-- Olhos "allegri" de gato (estilo do app, src/render/vector/eyes.ts), íris marrom, na posição e
+       tamanho dos olhos do europeu. Serve para todos os gatos. Quadro 1024 do guia. -->
+  <g id="eyes"><path d="M349.085 403.18 Q384.7 350.805 420.315 403.18" fill="none" stroke="#4a2310" stroke-width="17.6" stroke-linecap="round"/><path d="M570.255 403.03999999999996 Q605.7 350.91499999999996 641.1450000000001 403.03999999999996" fill="none" stroke="#4a2310" stroke-width="17.6" stroke-linecap="round"/></g>
+</svg>

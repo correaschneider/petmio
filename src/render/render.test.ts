@@ -46,6 +46,8 @@ describe('renderPetSvg', () => {
       }
       expect(count).toBeGreaterThan(1000);
     },
+    // varre milhares de combinações (dobraram com o bigode): o runner do CI passa de 5 s
+    60_000,
   );
 
   // No renderer ativo o pelo só troca cor; varre todas as combinações de estrutura.

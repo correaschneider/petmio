@@ -55,6 +55,11 @@ docs/             Contexto, arquitetura, pipeline de arte, protótipo original
 Detalhes em [`docs/architecture.md`](docs/architecture.md) e
 [`docs/art-pipeline.md`](docs/art-pipeline.md).
 
+## Site
+
+Publicado no GitHub Pages: <https://correaschneider.github.io/petmio/> — a cada push na `main` o
+workflow `.github/workflows/pages.yml` gera o export estático (`PAGES=1 pnpm build` → `out/`).
+
 ## Estado
 
 - ✅ Fluxo completo do protótipo: criar (com "Sorprendimi"), nomear, PNG com download real e

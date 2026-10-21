@@ -2,7 +2,8 @@
 
 > **Substituído em 20/10/2026** pelas camadas vetoriais dos guias do Recraft — ver
 > [`art-layers-spec.md`](art-layers-spec.md). O que segue documenta a primeira tentativa (peças
-> do Nano Banana), mantida como histórico; `build_parts.py` e `render/layered` foram removidos.
+> do Nano Banana), mantida como histórico; `render/layered`, `art/raw/` e `art/reference/` foram
+> removidos (estão no histórico do git).
 
 Arte gerada com IA (Nano Banana / Gemini, conversa "Pet Mio Avatar Parts") e depois
 **vetorizada**. Referência-mestre de estilo: `art/reference/reference-labrador.jpg`.
